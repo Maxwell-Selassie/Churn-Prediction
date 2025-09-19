@@ -1,0 +1,33 @@
+{
+    "Logistic_Regression": {
+        "best_score": 0.6134006034086251,
+        "best_params": {
+            "classifier__C": 1.0,
+            "classifier__max_iter": 400
+        }
+    },
+    "Random_Forest": {
+        "best_score": 0.7407643195667105,
+        "best_params": {
+            "classifier__max_depth": 10,
+            "classifier__min_samples_split": 7,
+            "classifier__n_estimators": 100
+        }
+    },
+    "Decision_Trees": {
+        "best_score": 0.6729281758592542,
+        "best_params": {
+            "classifier__max_depth": 11,
+            "classifier__min_samples_split": 5
+        }
+    },
+    "XGBClassifier": {
+        "best_score": 0.7894056379309496,
+        "best_params": {
+            "classifier__learning_rate": 0.3,
+            "classifier__max_depth": 7,
+            "classifier__n_estimators": 200,
+            "classifier__reg_lambda": 0.1
+        }
+    }
+}
