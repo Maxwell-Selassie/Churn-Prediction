@@ -23,8 +23,8 @@ Actionable result: deploy targeted retention campaigns (welcome/onboarding for n
 Yearly net profits in USD millions — trend shows early growth, a dip during 2008–2009 (global shock) and 2020 (pandemic), then strong recovery and scale thereafter.
 
 |Year |	Profit (USD millions)|
-------|--------| ----------|
-|2002|	1.2|
+------|------------------|
+|2002c|	1.2|
 |2004|	3.5|
 |2005|	5.0|
 |2006|	7.5|
