@@ -1,4 +1,4 @@
-$M$ $&$ $V$ $—$ $Customer$ $Churn$ $Prediction$
+$M$ $&$ $V$ — $Customer$ $Churn$ $Prediction$
 
 Keeping customers > growing customers
 
