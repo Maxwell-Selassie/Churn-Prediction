@@ -1,8 +1,8 @@
-M & V — Customer Churn Prediction
+$M$ $&$ $V$ $—$ $Customer$ $Churn$ $Prediction$
 
 Keeping customers > growing customers
 
-Executive summary (for non-technical readers)
+`Executive summary (for non-technical readers)`
 
 M & V is a multi-national retailer (fashion, electronics, computer accessories and more) founded in 2002, with ~2,500 employees and >1,000,000 customers worldwide. Over the past two decades the company grew from a small startup to a global brand — but growth brings a hidden cost: customer churn (lost customers) reduces lifetime value and amplifies acquisition spend.
 
@@ -22,31 +22,30 @@ Actionable result: deploy targeted retention campaigns (welcome/onboarding for n
 
 Yearly net profits in USD millions — trend shows early growth, a dip during 2008–2009 (global shock) and 2020 (pandemic), then strong recovery and scale thereafter.
 
-Year	Profit (USD millions)
-2002	1.2
-2003	2.0
-2004	3.5
-2005	5.0
-2006	7.5
-2007	10.0
-2008	9.0
-2009	8.5
-2010	12.0
-2011	15.0
-2012	20.0
-2013	24.0
-2014	30.0
-2015	36.0
-2016	45.0
-2017	55.0
-2018	68.0
-2019	80.0
-2020	70.0
-2021	95.0
-2022	120.0
-2023	150.0
-2024	180.0
-2025	210.0
+|Year |	Profit (USD millions)|
+------|--------| ----------|
+|2002|	1.2|
+|2004|	3.5|
+|2005|	5.0|
+|2006|	7.5|
+|2007|	10.0|
+|2008|	9.0|
+|2009|	8.5|
+|2010|	12.0|
+|2011|	15.0|
+|2012|	20.0|
+|2013|	24.0|
+|2014|	30.0|
+|2015|	36.0|
+|016|	45.0|
+|2018|	68.0|
+|2019|	80.0|
+|2020|	70.0|
+|2021|	95.0|
+|2022|	120.0|
+|2023|	150.0|
+|2024|	180.0|
+|2025|	210.0|
 
 ***Mission & Vision***
 
