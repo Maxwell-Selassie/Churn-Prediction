@@ -213,7 +213,55 @@ def run_eda(filepath):
     }
 
 
+from autoviz.AutoViz_Class import AutoViz_Class
+import pkg_resources
+import os
+
+def autoviz_report(
+        df: pd.DataFrame = None,
+        filename: str = None,
+        target: str = None,
+        output_dir: str = 'autoviz_reports',
+        dep_var: str = None
+):
+    '''
+        Generates a comprehensive Autoviz EDA report from either a dataframe or a file.
+        Saves HTML plots in the specified output directory. 
+    '''
+    os.makedirs(output_dir,exist_ok=True)
+    logging.info(f'Running AutoViz eda....Output directory : {output_dir}')
+
+    AV = AutoViz_Class()
+    # ---- if a dataframe is passed---
+    if df is not None:
+        logging.info(f'Using in-memory dataframe with {df.shape[0]} rows and {df.shape[1]} columns')
+        dft = AV.AutoViz(
+            filename='',
+            depVar=target,
+            dfte=df,
+            verbose=2,
+            chart_format='html',
+            save_plot_dir=output_dir
+        )
+
+    # if a filename is passed instead of a dataframe
+    elif filename:
+        dft = AV.AutoViz(
+            filename='../data/e-commerce.csv',
+            depVar=target,
+            dfte=None,
+            verbose=2,
+            chart_format='html',
+            save_plot_dir=output_dir
+        )
+
+    else:
+        raise ValueError('You must either provide a dataframe or a filepath!')
     
+    logging.info(f'Autoviz EDA completed. Reports saved successfully')
+    return dft
+
+
 if __name__ == '__main__':
     results = run_eda('../data/e-commerce.csv')
     df = results['data']
