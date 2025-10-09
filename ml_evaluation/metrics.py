@@ -20,4 +20,3 @@ def evaluate_model(y_test,y_pred,y_probs):
     logging.info(f'Log Loss : {log_loss(y_test,y_pred):.3f}')
     logging.info(f'Matthews Corrcoef: {round(matthews_corrcoef(y_test,y_pred),2 ) * 100}%')
     logging.info(f'Cohen_Kappa score : {round(cohen_kappa_score(y_test,y_pred), 2) * 100}%')
-evaluate_model()

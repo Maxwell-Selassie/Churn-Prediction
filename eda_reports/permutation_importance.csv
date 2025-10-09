@@ -1,0 +1,35 @@
+Features,Importance
+Tenure,0.12850061957868647
+Complain,0.043246592317224275
+NumberOfAddress,0.03370508054522927
+CashbackAmount,0.02738537794299878
+DaySinceLastOrder,0.022552664188351935
+WarehouseToHome,0.02230483271375463
+SatisfactionScore,0.022180916976456033
+OrderAmountHikeFromlastYear,0.018587360594795533
+MaritalStatus_Single,0.017967781908302394
+CityTier,0.011276332094175955
+PreferedOrderCat_Laptop & Accessory,0.010408921933085513
+NumberOfDeviceRegistered,0.00656753407682773
+Gender_Female,0.0059479553903345915
+OrderCount,0.004213135068153684
+HourSpendOnApp,0.0026022304832713727
+PreferredLoginDevice_Computer,0.0023543990086741127
+PreferredPaymentMode_Debit Card,0.0019826517967781675
+PreferredPaymentMode_COD,0.0019826517967781454
+PreferredPaymentMode_E wallet,0.0018587360594795265
+MaritalStatus_Married,0.0016109045848822668
+PreferedOrderCat_Fashion,0.0012391573729863658
+PreferedOrderCat_Mobile Phone,0.0003717472118959231
+CouponUsed,0.00012391573729864103
+PreferedOrderCat_Mobile,0.0
+PreferredPaymentMode_CC,0.0
+PreferedOrderCat_Grocery,0.0
+PreferredPaymentMode_Cash on Delivery,0.0
+Gender_Male,0.0
+PreferedOrderCat_Others,-0.00012391573729864103
+MaritalStatus_Divorced,-0.00024783147459728205
+PreferredPaymentMode_UPI,-0.0003717472118959231
+PreferredLoginDevice_Mobile Phone,-0.0006195786864932051
+PreferredPaymentMode_Credit Card,-0.0006195786864932051
+PreferredLoginDevice_Phone,-0.0016109045848822668

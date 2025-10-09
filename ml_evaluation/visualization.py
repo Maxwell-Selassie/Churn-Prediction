@@ -27,7 +27,7 @@ def plot_precision_recall_curve(y_test, y_probs):
     plt.xlabel("Threshold")
     plt.ylabel("Score")
     plt.legend()
-    plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
+    plt.savefig('plots/prc.png',bbox_inches='tight',dpi=300)
     plt.show()
 
 def plot_learning_curve(best_model, x_train, y_train):
@@ -44,7 +44,7 @@ def plot_learning_curve(best_model, x_train, y_train):
     plt.title('Learning Curve')
     plt.xlabel('Training set sizes')
     plt.ylabel('Accuracy')
-    plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
+    plt.savefig('plots/learning_curve.png',bbox_inches='tight',dpi=300)
     plt.show()
 
 def plot_roc_curve(y_test, y_probs):
@@ -59,7 +59,7 @@ def plot_roc_curve(y_test, y_probs):
     plt.xlabel('False positive rate')
     plt.ylabel('True positive rate')
     plt.legend()
-    plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
+    plt.savefig('plots/roc_curve.png',bbox_inches='tight',dpi=300)
     plt.show()
 
 # precision recall tradeoff
@@ -73,7 +73,7 @@ def plot_precision_recall(y_test, y_probs):
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.legend()
-    plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
+    plt.savefig('plots/pr.png',bbox_inches='tight',dpi=300)
     plt.show()
 
 # compares how well predicted probabilties match real outcomes
@@ -86,5 +86,5 @@ def plot_calibration_curve(y_test, y_probs):
     plt.title('Calibration Curve')
     plt.xlabel("Mean Predicted Probability")
     plt.ylabel('Fraction of Positives')
-    plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
-    plt.show()   
+    plt.savefig('plots/calibration_curve.png',bbox_inches='tight',dpi=300)
+    plt.show()

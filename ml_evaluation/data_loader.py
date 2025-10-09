@@ -18,4 +18,3 @@ def load_data():
         return x_train,x_test,y_train,y_test
     except FileNotFoundError as e:
         raise FileNotFoundError('Files not found!') from e
-load_data()

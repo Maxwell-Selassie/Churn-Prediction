@@ -16,8 +16,4 @@ def load_model(model_path: str = 'models/XGBClassifier_best_model.pkl'):
     except FileNotFoundError as e:
         raise FileNotFoundError('Model not found!') from e
 
-    cv = StratifiedKFold(n_splits=5,shuffle=True,random_state=42)
-    calibrated_model = CalibratedClassifierCV(best_model,method='sigmoid',cv=cv)
-
-    return calibrated_model, best_model
-load_model()
+    return best_model
