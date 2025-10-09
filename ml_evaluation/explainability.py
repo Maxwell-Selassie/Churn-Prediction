@@ -25,7 +25,7 @@ def compute_feature_importance(best_model):
     }).sort_values(by='importances', ascending=False)
     plt.figure(figsize=(15,8))
     sns.barplot(data=feature_imp.head(10), x='feature names',y='importances',color='indigo')
-    plt.title('Top 20 Feature Importance')
+    plt.title('Top 10 Feature Importance')
     plt.xticks(rotation=90)
     plt.savefig('plots/feature_importance.png',bbox_inches='tight',dpi=300)
     plt.show()
