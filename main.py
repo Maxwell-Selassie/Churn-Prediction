@@ -28,12 +28,12 @@ def load_artifacts():
     if not os.path.exists(model_path):
         log.error('Model Not Found %s', model_path)
         raise FileNotFoundError('File Not Found: ', model_path)
-    log.info('Model model from %s',model_path)
+    log.info('Model from %s',model_path)
     model = joblib.load(model_path)
     app.state.model = model
 
     # load feature names else try model attributes
-    if os.path.exits(feature_path):
+    if os.path.exists(feature_path):
         log.info('Loading feature names from %s', feature_path)
         with open(feature_path,'r') as file:
             feature_names = json.load(file)
