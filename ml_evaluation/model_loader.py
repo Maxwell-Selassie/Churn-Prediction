@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%H:%M:%S')
 
-def load_model(model_path: str = '../models/XGBClassifier_best_model.pkl'):
+def load_model(model_path: str = 'models/XGBClassifier_best_model.pkl'):
     try:
         best_model = joblib.load(model_path)
         logging.info('Best model successfully loaded!')
