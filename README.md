@@ -18,7 +18,7 @@ Single / unmarried customers show higher churn risk in our data
 
 Actionable result: deploy targeted retention campaigns (welcome/onboarding for new customers, fast complaint resolution, loyalty benefits) to reduce churn and protect profits.
 
-**Profits (2002 → 2025) — USD millions**
+`Profits (2002 → 2025) — USD millions`
 
 Yearly net profits in USD millions — trend shows early growth, a dip during 2008–2009 (global shock) and 2020 (pandemic), then strong recovery and scale thereafter.
 
