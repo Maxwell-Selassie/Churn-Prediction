@@ -2,9 +2,9 @@ import shap
 from sklearn.inspection import permutation_importance
 import pandas as pd
 import matplotlib.pyplot as plt
-import warnings
+# import warnings
 import seaborn as sns
-warnings.filterwarnings('ignore')
+# warnings.filterwarnings('ignore')
 import numpy as np
 
 def feature_importance(best_model):
@@ -12,6 +12,7 @@ def feature_importance(best_model):
     print(f'Explaining Model : {best_model}')
 
     feature_names = best_model.named_steps['preprocessor'].get_feature_names_out()
+
     if hasattr(best_model.named_steps['classifier'], 'feature_importances_'):
         importances = best_model.named_steps['classifier'].feature_importances_
     elif hasattr(best_model.named_steps['classifier'], 'coef_'):

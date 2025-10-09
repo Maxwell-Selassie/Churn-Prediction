@@ -18,6 +18,7 @@ def plot_confusion_matrix(y_test,y_pred):
     plt.savefig('plots/confusion_matrix.png',bbox_inches='tight',dpi=300)
     plt.show()
 
+
 # threshold 
 def plot_precision_recall_curve(y_test, y_probs):
     precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs)

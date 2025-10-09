@@ -15,7 +15,7 @@ def main():
     calibrated_model, best_model = load_model()
 
     calibrated_model.fit(x_train,y_train)
-    joblib.dump('../models/calibrated_model.pkl')
+    joblib.dump('models/calibrated_model.pkl')
 
     y_probs = calibrated_model.predict_proba(x_test)[:,1]
     threshold = 0.2
