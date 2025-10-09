@@ -4,6 +4,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import logging
 from sklearn.model_selection import train_test_split
+import json
 
 logging.basicConfig(level=logging.INFO, format= '%(asctime)s - %(levelname)s : %(message)s', datefmt='%H:%M:%S')
 
@@ -28,4 +29,9 @@ def run():
     y_train.to_frame('y_train').to_parquet('../data/y_train.parquet',index=False)
     y_test.to_frame('y_test').to_parquet('../data/y_test.parquet',index=False)
 
-    logging.info('Train/test splits successfully saved!')
+    feature_names = x_train.columns.tolist()
+    with open('../models/feature_names.json','w') as file:
+        json.dump(feature_names,file, indent=4)        
+
+
+    logging.info('Train/test splits and feature names successfully saved!')
