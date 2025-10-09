@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s : %(message)s', datefmt='%H:%M:%S')
 
-def main():
+def model_evaluation():
     x_train, x_test, y_train, y_test = load_data()
     best_model = load_model('models/XGBClassifier_best_model.pkl')
 
@@ -43,4 +43,3 @@ def main():
     compute_permutation_importance(best_model, x_test, y_test)
     compute_shap(best_model,x_test)
     logging.info('Explanability.py file successfully runned')
-main()

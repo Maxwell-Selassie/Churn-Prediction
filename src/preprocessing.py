@@ -8,7 +8,7 @@ import json
 
 logging.basicConfig(level=logging.INFO, format= '%(asctime)s - %(levelname)s : %(message)s', datefmt='%H:%M:%S')
 
-def run():
+def preprocessing():
     # load preprocessed csv file 
     try:
         df = pd.read_csv('../data/Preprocessed_e-commerce.csv')

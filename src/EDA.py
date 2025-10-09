@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
+from autoviz.AutoViz_Class import AutoViz_Class
+import pkg_resources
+import os
 
 
 
@@ -162,61 +165,6 @@ def save_summary(df: pd.DataFrame, name: str):
     df.to_csv(path, index=False)
     logging.info(f'Saved report: {path}')
 
-
-def run_eda(filepath):
-    df = load_data(filepath)
-    overview = dataset_overview(df)
-    num_cols = numeric_columns(df)
-    cat_cols = categorical_columns(df)
-
-    if 'CouponUsed' in df.columns:
-        df['CouponUsed'].fillna(0,inplace=True)
-
-    if 'HourSpendOnApp' in df.columns:
-        df['HourSpendOnApp'].fillna(df['HourSpendOnApp'].mean(), inplace=True)
-    
-    if 'WarehouseToHome' in df.columns:
-        df = df.query('WarehouseToHome <= 36')
-
-    if 'Tenure' in df.columns:
-        df['Tenure'].fillna(df['Tenure'].median(), inplace=True)
-
-    if 'DaySinceLastOrder' in df.columns:
-        df['DaySinceLastOrder'].fillna(df['DaySinceLastOrder'].median(), inplace=True)
-    
-    if 'OrderAmountHikeFromlastYear' in df.columns:
-        df['OrderAmountHikeFromlastYear'].fillna(df['OrderAmountHikeFromlastYear'].mean(), inplace=True)
-
-    if 'OrderCount' in df.columns:
-        df['OrderCount'].fillna(df['OrderCount'].mean(), inplace=True)
-
-    missing = missing_data(df)
-    duplicates = duplicate(df)
-    outliers = outlier_summary(df, num_cols)
-    df = one_hot_encode(df, cat_cols)
-    logging.info(f'EDA completed successfully!')
-
-    save_summary(overview,'overview')
-    save_summary(missing, 'missing_data')
-    save_summary(outliers, 'outlier_summary')
-    if duplicates is not None:
-        save_summary(duplicates,'duplicates')
-    
-    return {
-        'data' : df,
-        'overview' : overview,
-        'num_cols' :num_cols,
-        'cat_cols' : cat_cols,
-        'missing' : missing,
-        'duplicates' : duplicates,
-        'outliers' : outliers,
-    }
-
-
-from autoviz.AutoViz_Class import AutoViz_Class
-import pkg_resources
-import os
-
 def autoviz_report(
         df: pd.DataFrame = None,
         filename: str = None,
@@ -262,6 +210,53 @@ def autoviz_report(
     return dft
 
 
-if __name__ == '__main__':
-    results = run_eda('../data/e-commerce.csv')
-    df = results['data']
+def run_eda(filepath: str = '../data/e-commerce.csv'):
+    df = load_data(filepath)
+    overview = dataset_overview(df)
+    num_cols = numeric_columns(df)
+    cat_cols = categorical_columns(df)
+
+    if 'CouponUsed' in df.columns:
+        df['CouponUsed'].fillna(0,inplace=True)
+
+    if 'HourSpendOnApp' in df.columns:
+        df['HourSpendOnApp'].fillna(df['HourSpendOnApp'].mean(), inplace=True)
+    
+    if 'WarehouseToHome' in df.columns:
+        df = df.query('WarehouseToHome <= 36')
+
+    if 'Tenure' in df.columns:
+        df['Tenure'].fillna(df['Tenure'].median(), inplace=True)
+
+    if 'DaySinceLastOrder' in df.columns:
+        df['DaySinceLastOrder'].fillna(df['DaySinceLastOrder'].median(), inplace=True)
+    
+    if 'OrderAmountHikeFromlastYear' in df.columns:
+        df['OrderAmountHikeFromlastYear'].fillna(df['OrderAmountHikeFromlastYear'].mean(), inplace=True)
+
+    if 'OrderCount' in df.columns:
+        df['OrderCount'].fillna(df['OrderCount'].mean(), inplace=True)
+
+    missing = missing_data(df)
+    duplicates = duplicate(df)
+    outliers = outlier_summary(df, num_cols)
+    df = one_hot_encode(df, cat_cols)
+    dft = autoviz_report()
+    logging.info(f'EDA completed successfully!')
+
+    save_summary(overview,'overview')
+    save_summary(missing, 'missing_data')
+    save_summary(outliers, 'outlier_summary')
+    if duplicates is not None:
+        save_summary(duplicates,'duplicates')
+    
+    print({
+        'data' : df,
+        'overview' : overview,
+        'num_cols' :num_cols,
+        'cat_cols' : cat_cols,
+        'missing' : missing,
+        'duplicates' : duplicates,
+        'outliers' : outliers,
+    })
+    print(dft)

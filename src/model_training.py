@@ -1,4 +1,4 @@
-def run(): 
+def model_training(): 
     # import libraries
     import pandas as pd
     import numpy as np
