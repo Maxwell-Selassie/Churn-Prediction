@@ -369,4 +369,4 @@ def data_profile(df: pd.DataFrame) -> Dict[str,Any]:
     return profile
 
 if __name__ == '__main__':
-    log.info("💯Utility module loaded successfully")
+    log.info(f"Utility module loaded successfully")
