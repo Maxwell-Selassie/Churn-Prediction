@@ -50,7 +50,7 @@ logs_dir = base_dir / 'logs'
 plots_dir = base_dir / 'plots'
 models_dir = base_dir / 'models'
 
-def setup_logger(name: str, log_filename: str | Path, level = logging.INFO) -> logging.log:
+def setup_logger(name: str, log_filename: str | Path, level = logging.INFO) -> logging.Logger:
     ''' Setup a dedicated timedrotatingfilehandler logging system that logs information to both file and console
 
     Args: 
@@ -193,8 +193,7 @@ def load_joblib_file(filename : str | Path) -> Any:
     '''
     try:
         filepath = Path(filename)
-        with open(filepath,'r') as file:
-            model = joblib.load(file)
+        model = joblib.load(filepath)
         log.info(f'✅Model loaded from {filepath}')
         return model
     except FileNotFoundError:
@@ -251,7 +250,7 @@ def save_yaml_file(config : Dict[str, Any], filename: str | Path, sort_keys: boo
     try:
         filepath = Path(filename)
         with open(filepath,'w') as file:
-            yaml.dump(file,filepath, sort_keys=sort_keys)
+            yaml.dump(config,file, sort_keys=sort_keys)
         log.info(f'✅YAML configuration saved to {filepath}')
     except Exception as e:
         log.error(f'❌Error saving YAML config data to {filepath} : {e}')
@@ -319,17 +318,19 @@ def validate_df(df: pd.DataFrame, required_cols: Optional[List[str]]) -> None:
         log.error(f'❌The dataframe is empty')
         raise ValueError(f'✖️The dataframe is empty!')
 
-    if len(required_cols) > 0:
+    if required_cols is None:
+        log.info('No required columns specified')
+
+    if required_cols:
         missing_cols = [c for c in required_cols if c not in df.columns]
-        if len(missing_cols) > 0:
+        if missing_cols:
             log.error(f'❌The dataframe is missing required columns : {missing_cols}')
+            raise ValueError(f'✖️Missing required columns : {missing_cols}')
 
         else:
-            log.info(f'✅Dataframe has no required missing column')
-    else:
-        log.info(f'✅No required columns! Skipping data validation')
+            log.info(f'✅Dataframe has no required missing columns')
 
-def get_memory_usage(df: pd.DataFrame) -> Dict[str,float]:
+def get_memory_usage(df: pd.DataFrame) -> Dict[str,float | int]:
     '''Get the memory usage statistics of the dataframe
     
     Args:
@@ -357,7 +358,7 @@ def data_profile(df: pd.DataFrame) -> Dict[str,Any]:
     Returns:
         Dictionary with data profile'''
     profile = {
-        'Obervations' : df.shape[0],
+        'Observations' : df.shape[0],
         'Features' : df.shape[1],
         'Numeric_columns' : df.select_dtypes(include=[np.number]).columns.tolist(),
         'Categorical_columns' : df.select_dtypes(exclude=[np.number]).columns.tolist(),
