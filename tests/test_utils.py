@@ -84,5 +84,39 @@ class TestJSONOperations:
         '''Test that a FileNotFoundError is raised if file doesn't exist'''
         with pytest.raises(FileNotFoundError):
             load_json_file('non_existent_file.json')
+
+        
+    def test_load_malformed_json(self,tmp_path):
+        '''Test that a JSONDecodeError is raised if JSON Data is malformed'''
+        test_file = tmp_path / 'malformed_data.json'
+        test_data = ('{This data is malformed}')
+        test_file.write_text(test_data)
+
+        with pytest.raises(json.JSONDecodeError):
+            load_json_file(test_file)
+
+class TestYAMLOperations:
+    '''Test All YAML file Operations'''
+    def save_load_yaml_file(self,tmp_path):
+        '''Test loading and saving a yaml configuration file successfully'''
+        test_file = tmp_path / 'config_file.yaml'
+        test_data = {
+            'models' : {
+                'name' : 'Random Forest',
+                'params' : {
+                    'n_estimators' : [100,200,300],
+                    'max_depth' : [8,10,12]
+                }
+            }
+        }
+        test_file.write_text(test_data)
+
+        save_yaml_file(test_data,test_file,sort_keys=False)
+        loaded_config = read_yaml_file(test_file)
+
+        assert test_file.exists()
+        assert loaded_config == test_data
+        assert loaded_config['models']['name'] == 'Random Forest'
+
 if __name__ == '__main__':
     pytest([__file__,'-v','--cov=utils','--cov-report=html'])
