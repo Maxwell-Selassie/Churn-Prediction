@@ -41,7 +41,7 @@ warnings.filterwarnings('ignore')
 # ==============================
 
 base_dir = Path.cwd() # current working directory
-list_of_directories = ['data','data/raw','data/processed','plots','data/splits','models','logs','config']
+list_of_directories = ['data','data/raw','data/processed','plots','data/splits','models','logs','config','tests']
 for directory in list_of_directories:
     Path(directory).mkdir(exist_ok=True)
 
@@ -254,6 +254,22 @@ def save_yaml_file(config : Dict[str, Any], filename: str | Path, sort_keys: boo
         log.info(f'✅YAML configuration saved to {filepath}')
     except Exception as e:
         log.error(f'❌Error saving YAML config data to {filepath} : {e}')
+        raise
+
+def save_joblib_file(data: Any, filename: str | Path) -> None:
+    '''Saves binary data to a joblib model
+    
+    Args:
+        data : Binary data to be saved
+        filename: Output file path
+    '''
+    try:
+        filepath = Path(filename)
+        with open(filepath,'w') as file:
+            joblib.dump(data, file)
+        log.info(f'✅Data successfullt saved to {filepath}')
+    except Exception as e:
+        log.error(f'❌Error saving binary data to {filepath} : {e}')
         raise
 
 def ensure_directories(directory: str) -> Path:
