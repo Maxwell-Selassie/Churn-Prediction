@@ -10,8 +10,8 @@ helper functions for this churn prediction end-to-end machine learning project
     - Load yaml config file
     - Load joblib file
     - Save csv file
-    - Save yaml config file
     - Save json file
+    - Save yaml config file
     - Save joblib file
     - Ensure directories exist
 
@@ -32,6 +32,7 @@ import yaml
 import joblib
 from typing import Dict, Any, List, Optional
 from logging.handlers import TimedRotatingFileHandler
+from datetime import datetime
 from pathlib import Path
 warnings.filterwarnings('ignore')
 
@@ -118,16 +119,16 @@ def load_csv_file(filename : str | Path) -> pd.DataFrame:
         log.info(f'✅Data loaded from {filepath} | Shape {df.shape}')
         return df
     except FileNotFoundError:
-        log.info('❌File Not Found! Check file path and try again!')
+        log.error('❌File Not Found! Check file path and try again!')
         raise
     except pd.errors.EmptyDataError as e:
-        log.info(f'❌Data is empty : {e}')
+        log.error(f'❌Data is empty : {e}')
         raise
     except pd.errors.ParserError as e: 
-        log.info(f'❌CSV file is malformed : {e}')
+        log.error(f'❌CSV file is malformed : {e}')
         raise
     except Exception as e:
-        log.info(f'❌Error parsing CSV file : {e}')
+        log.error(f'❌Error parsing CSV file : {e}')
 
 def load_json_file(filename : str | Path) -> Any:
     '''Loads json data from file
@@ -146,13 +147,13 @@ def load_json_file(filename : str | Path) -> Any:
         log.info(f'✅Data loaded successfully from {filepath}')
         return data
     except FileNotFoundError:
-        log.info(f'❌File not found! Check filepath and try again')
+        log.error(f'❌File not found! Check filepath and try again')
         raise
     except json.JSONDecodeError as e:
-        log.info(f'❌Json file is malformed : {e}')
+        log.error(f'❌Json file is malformed : {e}')
         raise
     except Exception as e:
-        log.info(f'❌Error parsing json file : {e}')
+        log.error(f'❌Error parsing json file : {e}')
         raise
 
 def read_yaml_file(filename : str | Path) -> Any:
@@ -172,13 +173,13 @@ def read_yaml_file(filename : str | Path) -> Any:
         log.info(f'✅Configuration Info. loaded from {filepath}')
         return config
     except FileNotFoundError:
-        log.info(f'❌File not found! Check file path and try again')
+        log.error(f'❌File not found! Check file path and try again')
         raise
     except yaml.YAMLError:
-        log.info(f'❌YAML file is malformed : {e}')
+        log.error(f'❌YAML file is malformed : {e}')
         raise
     except Exception as e:
-        log.info(f'❌Error parsing yaml file : {e}')
+        log.error(f'❌Error parsing yaml file : {e}')
         raise
 
 def load_joblib_file(filename : str | Path) -> Any:
@@ -197,9 +198,175 @@ def load_joblib_file(filename : str | Path) -> Any:
         log.info(f'✅Model loaded from {filepath}')
         return model
     except FileNotFoundError:
-        log.info(f'❌File not found! Check file path and try again')
+        log.error(f'❌File not found! Check file path and try again')
         raise
     except Exception as e:
-        log.info(f'❌Error parsing joblib file : {e}')
+        log.error(f'❌Error parsing joblib file : {e}')
         raise
 
+def save_csv_file(data: pd.DataFrame, filename: str | Path,index: bool = False) -> None:
+    '''Save dataframe to a csv file
+    
+    Args:
+        data: Dataframe to be saved
+        filename: Ouput file path
+        
+    Example:
+        save_csv_file(data=df, filename="data/cleaned_data.csv")    
+    '''
+    try:
+        filepath = Path(filename)
+        data.to_csv(filepath, index=index)
+        log.info(f'✅Data successfully saved to {filepath}')
+    except Exception as e:
+        log.error(f'❌Error saving CSV data to {filepath} : {e}')
+        raise
+
+def save_json_file(data : Any, filename: str | Path, indent: int = 4) -> None:
+    '''Save data to a json file
+    
+    Args:
+        data : Data to be saved (Data must be JSON serializable)
+        filename : Output file path
+
+    Example: 
+        save_json_file(data=data, filename="data/outlier_summary.json",indent=4)
+    '''
+    try:
+        filepath = Path(filename)
+        with open(filepath,'w') as file:
+            json.dump(data, file, indent=indent)
+        log.info(f'✅Data successfully saved to {filepath}')
+    except Exception as e:
+        log.error(f'❌Error saving JSON data to {filepath} : {e}')
+        raise
+
+def save_yaml_file(config : Dict[str, Any], filename: str | Path, sort_keys: bool = False) -> None:
+    '''Save data to a yaml config yaml
+    
+    Args:
+        config: configuration information to be saved
+        filename: Output file path
+    '''
+    try:
+        filepath = Path(filename)
+        with open(filepath,'w') as file:
+            yaml.dump(file,filepath, sort_keys=sort_keys)
+        log.info(f'✅YAML configuration saved to {filepath}')
+    except Exception as e:
+        log.error(f'❌Error saving YAML config data to {filepath} : {e}')
+        raise
+
+def ensure_directories(directory: str) -> Path:
+    '''Ensure all directories exist, if not, then create the directory
+    
+    Args:
+        directory: Name of folder
+
+    Returns:
+        Path : created directory
+    '''
+    path = Path(directory)
+    path.mkdir(parents=True,exist_ok=True)
+    log.info(f'✅Directory ensured : {path}')
+    return path
+
+def get_timestamp(format: str = '%Y-%m-%d %H:%M:%S') -> datetime:
+    '''Get timestamp for file naming
+    
+    Args:
+        format: Date formatting style
+        
+    Returns:
+        datatime: Date, formatted correctly
+    '''
+    return datetime.now().strftime(format)
+
+
+def project_metadata(metadata: Dict[str,Any], filename: str | Path) -> Dict[str,Any]:
+    ''' Get and save project metadata
+
+    Args:
+        metadata : Project metadata 
+        filename : Ouptut file path
+
+    Returns:
+        Dictionary: A dictionary containing project metadata
+    '''
+    metadata = {
+        'Timestamp' : get_timestamp(),
+        'Project Name' : "👨👩Customer Churn Prediction",
+        'Author' : "💎Maxwell Selasie Hiamatsu",
+        'Python Version' : __import__('sys').version,
+        'Pandas version' : pd.__version__,
+        'Numpy version' : pd.__version__
+    }
+    save_json_file(data=metadata, filename=filename)
+    log.info(f"✅Project metadata saved to {filename}")
+    return metadata
+
+def validate_df(df: pd.DataFrame, required_cols: Optional[List[str]]) -> None:
+    '''Validate dataframe and required columns
+    
+    Args:
+        df : Dataframe to validate
+        required_cols: columns to validate
+
+    Raises:
+        ValueError : If dataframe is empty
+    '''
+    if df.empty:
+        log.error(f'❌The dataframe is empty')
+        raise ValueError(f'✖️The dataframe is empty!')
+
+    if len(required_cols) > 0:
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if len(missing_cols) > 0:
+            log.error(f'❌The dataframe is missing required columns : {missing_cols}')
+
+        else:
+            log.info(f'✅Dataframe has no required missing column')
+    else:
+        log.info(f'✅No required columns! Skipping data validation')
+
+def get_memory_usage(df: pd.DataFrame) -> Dict[str,float]:
+    '''Get the memory usage statistics of the dataframe
+    
+    Args:
+        df : Dataframe to analyze
+        
+    Returns:
+        Dictionary with memory usage details
+    '''
+    memory_usage_mb = df.memory_usage(deep=True).sum() / 1024 ** 2
+    per_row_usage_in_kb = (df.memory_usage(deep=True).sum() / len(df)) / 1024
+
+    return {
+        'm_usage_in_mb' : memory_usage_mb.round(2),
+        'per_row_m_usage_in_kb': per_row_usage_in_kb.round(2),
+        'rows' : len(df),
+        'columns' : len(df.columns)
+    }
+
+def data_profile(df: pd.DataFrame) -> Dict[str,Any]:
+    '''Generate a quick profile of the dataframe
+    
+    Args:
+        df : Dataframe to profile
+        
+    Returns:
+        Dictionary with data profile'''
+    profile = {
+        'Obervations' : df.shape[0],
+        'Features' : df.shape[1],
+        'Numeric_columns' : df.select_dtypes(include=[np.number]).columns.tolist(),
+        'Categorical_columns' : df.select_dtypes(exclude=[np.number]).columns.tolist(),
+        'Missing_values' : df.isnull().sum().to_dict(),
+        'Duplicates' : df.duplicated().sum(),
+        'Data_types' : df.dtypes.astype(str).to_dict()
+    }
+    log.info(f'✅Data Profile generated for Dataframe with {df.shape}')
+    return profile
+
+if __name__ == '__main__':
+    log.info("💯Utility module loaded successfully")
