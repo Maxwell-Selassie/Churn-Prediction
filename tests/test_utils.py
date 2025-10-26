@@ -124,5 +124,37 @@ class TestYAMLOperations:
             read_yaml_file('non_existent_config_file.yaml')
 
 
+class TestDataOperations:
+    '''Test All Data Related Operations'''
+    def test_validate_valid_df(self):
+        # Arrange
+        df = pd.DataFrame({
+            'col1' : [1,2,3],
+            'col2' : ['A',"B","C"]
+        })
+        required_cols = ["col1","col2"]
+        # Act
+        validate_df(df,required_cols)
+
+        assert required_cols == df.columns
+        assert len(df) == 3
+        assert df['col1'] == [1,2,3]
+        assert df.columns.tolist() == ['col1','col2']
+
+    def test_empty_dataframe_df(self):
+        df = pd.DataFrame({})
+
+        with pytest.raises(ValueError, match="empty"):
+            validate_df(df,[])
+
+    def test_missing_required_columns(self):
+        df = pd.DataFrame({
+            'col1' : [1,2,3]
+        })
+        required_cols = ["col1","col2"]
+
+        with pytest.raises(ValueError):
+            validate_df(df,required_cols)
+
 if __name__ == '__main__':
     pytest([__file__,'-v','--cov=utils','--cov-report=html'])

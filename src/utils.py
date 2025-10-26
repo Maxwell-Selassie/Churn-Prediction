@@ -336,6 +336,7 @@ def validate_df(df: pd.DataFrame, required_cols: Optional[List[str]]) -> None:
 
     if required_cols is None:
         log.info('No required columns specified')
+        return
 
     if required_cols:
         missing_cols = [c for c in required_cols if c not in df.columns]
