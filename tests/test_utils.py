@@ -118,5 +118,11 @@ class TestYAMLOperations:
         assert loaded_config == test_data
         assert loaded_config['models']['name'] == 'Random Forest'
 
+    def test_yaml_not_found(self):
+        '''Test that a FileNotFoundError is raised when file does not exist'''
+        with pytest.raises(FileNotFoundError):
+            read_yaml_file('non_existent_config_file.yaml')
+
+
 if __name__ == '__main__':
     pytest([__file__,'-v','--cov=utils','--cov-report=html'])
