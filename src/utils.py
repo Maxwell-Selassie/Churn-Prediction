@@ -298,7 +298,7 @@ def get_timestamp(format: str = '%Y-%m-%d %H:%M:%S') -> datetime:
     return datetime.now().strftime(format)
 
 
-def project_metadata(metadata: Dict[str,Any], filename: str | Path) -> Dict[str,Any]:
+def project_metadata(output_file : str | Path) -> Dict[str,Any]:
     ''' Get and save project metadata
 
     Args:
@@ -316,8 +316,8 @@ def project_metadata(metadata: Dict[str,Any], filename: str | Path) -> Dict[str,
         'Pandas version' : pd.__version__,
         'Numpy version' : pd.__version__
     }
-    save_json_file(data=metadata, filename=filename)
-    log.info(f"✅Project metadata saved to {filename}")
+    save_json_file(data=metadata, filename=output_file)
+    log.info(f"✅Project metadata saved to {output_file}")
     return metadata
 
 def validate_df(df: pd.DataFrame, required_cols: Optional[List[str]]) -> None:

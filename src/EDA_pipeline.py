@@ -9,9 +9,11 @@ from autoviz.AutoViz_Class import AutoViz_Class
 from pathlib import Path
 from typing import List, Any, Dict, Optional
 import logging
+from dataclasses import dataclass
 
 from utils import (
-    load_csv_file,save_csv_file,ensure_directories,setup_logger, project_metadata,data_profile,get_timestamp
+    load_csv_file,save_json_file,ensure_directories,setup_logger, project_metadata,data_profile,get_timestamp,
+    validate_df,save_csv_file
 )
 
 log = setup_logger('EDA_pipeline','logs/EDA_pipeline.log',level=logging.INFO)
@@ -199,7 +201,7 @@ def autoviz_report(
         Generates a comprehensive Autoviz EDA report from either a dataframe or a file.
         Saves HTML plots in the specified output directory. 
     '''
-    os.makedirs(output_dir,exist_ok=True)
+    output_dir = ensure_directories('autoviz_reports')
     log.info(f'Running AutoViz eda....Output directory : {output_dir}')
 
     AV = AutoViz_Class()
@@ -232,17 +234,97 @@ def autoviz_report(
     log.info(f'Autoviz EDA completed. Reports saved successfully')
     return dft
 
+@dataclass
+class EDAResults:
+    '''
+    Attributes: 
+        data: Dataframe to be analyzed
+        validate_data : Data quality checks
+        data_profile : Quick summary of DataFrame
+        numeric_columns : List of numeric columns
+        categorical_columns : List of categorical columns
+        missing_data : A Dictionary of columns with missing values
+        duplicates: A dataframe containing duplicate rows
+        outliers : Outlier summary
+    '''
+    data: str
+    validate_data: Optional[Dict]
+    data_profiles : Dict
+    numerical_columns : List[str]
+    category_columns : List[str]
+    missing_data_ : Optional[pd.DataFrame]
+    duplicates_ : Optional[pd.DataFrame]
+    outliers_ : Optional[Dict]
 
-def run_eda(filepath: str = '../data/e-commerce.csv'):
 
+
+def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
+    '''Run EDA'''
+    log.info("="*50)
+    log.info("🎇STARTING EXPLORATORY ANALYSIS")
+    log.info("="*50)
+
+    # project metadata
+    project_metadata(output_file='data/project_metadata.json')
+
+    # data input and validation
+    df = load_csv_file(filepath)
+    required_cols = ['CustomerID',
+    'Churn',
+    'Tenure',
+    'PreferredLoginDevice',
+    'CityTier',
+    'WarehouseToHome',
+    'PreferredPaymentMode',
+    'Gender',
+    'HourSpendOnApp',
+    'NumberOfDeviceRegistered',
+    'PreferedOrderCat',
+    'SatisfactionScore',
+    'MaritalStatus',
+    'NumberOfAddress',
+    'Complain',
+    'OrderAmountHikeFromlastYear',
+    'CouponUsed',
+    'OrderCount',
+    'DaySinceLastOrder',
+    'CashbackAmount'
+    ]
+    save_json_file(required_cols,'data/required_cols.json',indent=4)
     
-    print({
-        'data' : df,
-        'overview' : overview,
-        'num_cols' :num_cols,
-        'cat_cols' : cat_cols,
-        'missing' : missing,
-        'duplicates' : duplicates,
-        'outliers' : outliers,
-    })
-    print(dft)
+    validate = validate_df(df, required_cols)
+    profile = data_profile(df)
+
+    # data exploration
+    numeric_cols = numeric_columns(df)
+    categorical_cols = categorical_columns(df)
+
+    missing = missing_data(df)
+    save_csv_file(missing, 'data/missing_summary.csv')
+
+    duplicates = duplicate(df)
+    save_json_file(duplicates, 'data/duplicated_data.json')
+
+    outliers = outlier_summary(df, numeric_cols)
+    save_csv_file(outliers, 'data/outliers.csv')
+
+    results = EDAResults(
+        data= df,
+        validate_data=validate,
+        data_profiles=profile,
+        numerical_columns=numeric_cols,
+        category_columns=categorical_cols,
+        missing_data_=missing,
+        duplicates_=duplicates,
+        outliers_=outliers
+    )
+
+    log.info("="*50)
+    log.info("💯EDA COMPLETED SUCCESSULLY!")
+    log.info('='*50)
+
+    return results
+
+if __name__ == '__main__':
+    run_eda()
+    autoviz_report()
