@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import List, Any, Dict, Optional
 import logging
 from dataclasses import dataclass
+from autoviz import AutoViz_Class
+import pkg_resources
 
 from utils import (
     load_csv_file,save_json_file,ensure_directories,setup_logger, project_metadata,data_profile,get_timestamp,
@@ -194,14 +196,14 @@ def autoviz_report(
         df: pd.DataFrame = None,
         filename: str = None,
         target: str = None,
-        output_dir: str = 'autoviz_reports',
+        output_dir: str = None,
         dep_var: str = None
 ):
     '''
         Generates a comprehensive Autoviz EDA report from either a dataframe or a file.
         Saves HTML plots in the specified output directory. 
     '''
-    output_dir = ensure_directories('autoviz_reports')
+
     log.info(f'Running AutoViz eda....Output directory : {output_dir}')
 
     AV = AutoViz_Class()
@@ -220,7 +222,7 @@ def autoviz_report(
     # if a filename is passed instead of a dataframe
     elif filename:
         dft = AV.AutoViz(
-            filename='../data/e-commerce.csv',
+            filename='data/raw/e-commerce.csv',
             depVar=target,
             dfte=None,
             verbose=2,
@@ -308,6 +310,10 @@ def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
     outliers = outlier_summary(df, numeric_cols)
     save_csv_file(outliers, 'data/outliers.csv')
 
+    # autoviz reports
+    output_dir = ensure_directories('autoviz_reports')
+    autoviz_report(df=df, target='Churn',output_dir=output_dir)
+
     results = EDAResults(
         data= df,
         validate_data=validate,
@@ -327,4 +333,4 @@ def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
 
 if __name__ == '__main__':
     run_eda()
-    autoviz_report()
+

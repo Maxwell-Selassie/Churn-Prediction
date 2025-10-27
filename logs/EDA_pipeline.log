@@ -252,3 +252,187 @@ Number of duplicates : 0
 2025-10-27 15:54:36 - INFO : ==================================================
 2025-10-27 15:54:36 - INFO : ==================================================
 2025-10-27 15:54:36 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : NUMERICAL COLUMNS
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-27 18:18:56 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-27 18:18:56 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-27 18:18:56 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-27 18:18:56 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-27 18:18:56 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-27 18:18:56 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-27 18:18:56 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-27 18:18:56 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-27 18:18:56 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-27 18:18:56 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-27 18:18:56 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-27 18:18:56 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-27 18:18:56 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-27 18:18:56 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-27 18:18:56 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : CATEGORICAL COLUMNS
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-27 18:18:56 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-27 18:18:56 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-27 18:18:56 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-27 18:18:56 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-27 18:18:56 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : MISSING DATA
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : Columns with missing data: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-27 18:18:56 - INFO : 
+Number of duplicates : 0
+
+2025-10-27 18:18:56 - INFO : No duplicates found
+
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : OUTLIER SUMMARY
+2025-10-27 18:18:56 - INFO : ==================================================
+2025-10-27 18:18:56 - INFO : Running AutoViz eda....Output directory : autoviz_reports
+2025-10-27 18:18:56 - INFO : Using in-memory dataframe with 5630 rows and 20 columns
+2025-10-27 18:21:34 - INFO : Autoviz EDA completed. Reports saved successfully
+2025-10-27 18:21:34 - INFO : ==================================================
+2025-10-27 18:21:34 - INFO : ==================================================
+2025-10-27 18:21:34 - INFO : Running AutoViz eda....Output directory : None
+2025-10-27 18:23:22 - INFO : ==================================================
+2025-10-27 18:23:22 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : NUMERICAL COLUMNS
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-27 18:23:23 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-27 18:23:23 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-27 18:23:23 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-27 18:23:23 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-27 18:23:23 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-27 18:23:23 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-27 18:23:23 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-27 18:23:23 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-27 18:23:23 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-27 18:23:23 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-27 18:23:23 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-27 18:23:23 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-27 18:23:23 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-27 18:23:23 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-27 18:23:23 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : CATEGORICAL COLUMNS
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-27 18:23:23 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-27 18:23:23 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-27 18:23:23 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-27 18:23:23 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-27 18:23:23 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : MISSING DATA
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : Columns with missing data: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-27 18:23:23 - INFO : 
+Number of duplicates : 0
+
+2025-10-27 18:23:23 - INFO : No duplicates found
+
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : OUTLIER SUMMARY
+2025-10-27 18:23:23 - INFO : ==================================================
+2025-10-27 18:23:23 - INFO : Running AutoViz eda....Output directory : autoviz_reports
+2025-10-27 18:23:23 - INFO : Using in-memory dataframe with 5630 rows and 20 columns
+2025-10-27 18:26:01 - INFO : Autoviz EDA completed. Reports saved successfully
+2025-10-27 18:26:01 - INFO : ==================================================
+2025-10-27 18:26:01 - INFO : ==================================================
+2025-10-27 18:26:01 - INFO : Running AutoViz eda....Output directory : None
