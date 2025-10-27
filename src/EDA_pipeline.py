@@ -94,35 +94,50 @@ def categorical_columns(df: pd.DataFrame) -> List[str]:
 
 
 #missing data
-def missing_data(df: pd.DataFrame) -> Optional[pd.DataFrame]:
-    '''Returns the sum of missing data alongside the percentage of 
-    missing values with proportion to the length of the dataframe
-
-    Args:
-        df: DataFrame to be analyzed
-
+def missing_values(df : pd.DataFrame) -> pd.DataFrame:
+    '''Analyze the missing values in the dataset
+        Args:
+        df: DataFrame to analyze
+        
     Returns:
-        A dataFrame of missing values and respective percentages
-        or None if no missing data
-    '''
-    if df.empty:
-        log.warning(f'❌DataFrame is empty!')
-        raise ValueError(f'❌DataFrame is empty!')
-    
+        DataFrame with missing value statistics'''
     missing = df.isnull().sum()
-    missing = missing[missing>0].sort_values(ascending=False)
-    missing_pct = missing / len(df) * 100
-
-    log.info("="*50)
-    log.info(f"MISSING DATA")
-    log.info("="*50)
-
+    missing = missing[missing > 0].sort_values(ascending=False)
+    if len(missing) == 0:
+        log.info('No missing values detected in dataset')
+        return pd.DataFrame(columns=['missing_values','missing_pct'])
+    
+    missing_pct = (missing / len(df)) * 100
     missing_df = pd.DataFrame({
-        'missing value' : missing,
-        'missing pct' : missing_pct.round(2)
+        'missing_values' : missing,
+        'missing_pct' : missing_pct.round(2)
     })
-    log.info(f'Columns with missing data: {missing_df.index.tolist()}')
+    log.info(f'Dataset shape: {df.shape}, Missing columns: {missing_df.index.tolist()}')
     return missing_df
+
+# ------------plot missing values -----------
+def plt_missing_values(missing_summary : pd.DataFrame) -> None:
+    """Visualize missing value distribution
+    
+    Args:
+        missing_summary: DataFrame from missing_values() function
+    """
+    if missing_summary['missing_values'].sum() == 0:
+        log.info(f'No missing values detected. Skipping plots')
+        return None
+    try:
+        missing_summary['missing_values'].plot(kind='barh',figsize=(12,7),
+                title='Distribution of missing values',
+                xlabel='Frequency',color='indigo')
+        
+        output_path = f'plots_missing_values.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        log.info(f'Missing values plot successfully plotted and saved to {output_path}')
+        plt.show()
+        plt.close()
+    except Exception as e:
+        log.error(f'Error creating missing value plots : {e}')
+        plt.close()
 
 #------duplicated rows--------
 def duplicate(df: pd.DataFrame) -> Optional[pd.DataFrame]:
@@ -146,8 +161,6 @@ def duplicate(df: pd.DataFrame) -> Optional[pd.DataFrame]:
     else:
         return duplicates
     
-
-
 
 # ---------outlier detection using IQR--------
 def check_outlier(df: pd.DataFrame, col: str) -> tuple:
@@ -301,8 +314,11 @@ def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
     numeric_cols = numeric_columns(df)
     categorical_cols = categorical_columns(df)
 
-    missing = missing_data(df)
-    save_csv_file(missing, 'data/missing_summary.csv')
+    missing = missing_values(df)
+    missing.to_csv('data/missing_summary.csv')
+
+    # visualization
+    plt_missing_values(missing)
 
     duplicates = duplicate(df)
     save_json_file(duplicates, 'data/duplicated_data.json')
