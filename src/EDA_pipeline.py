@@ -6,63 +6,63 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
 from autoviz.AutoViz_Class import AutoViz_Class
-import pkg_resources
-import os
-
-
-
+from pathlib import Path
+from typing import List, Any, Dict, Optional
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%H:%M:%S')
 
+from utils import (
+    load_csv_file,save_csv_file,ensure_directories,setup_logger, project_metadata,data_profile,get_timestamp
+)
 
-
-def load_data(filepath: str):
-    'Returns the dataframe'
-    try:
-        df = pd.read_csv(filepath) # load csv into the env as a pandas dataFrame
-        #prints out the number of rows and columns (5630 rows, 20 columns)
-        logging.info(f'Data successfully loaded with {df.shape[0]} rows and {df.shape[1]} columns\n')
-        return df
-    except FileNotFoundError:
-        logging.info('File Not Found! Please check filepath and try again')
-        raise
-
-
-
-# ----dataset overview--------
-def dataset_overview(df: pd.DataFrame):
-    '''Returns the shape of the dataset (i.e. number of rows and columns), 
-    alongside a short descriptive summary statistcs of the dataset'''
-    logging.info(f'Number of observations : {df.shape[0]}')
-    logging.info(f'Number of features : {df.shape[1]}')
-    return df.describe(include='all').T
+log = setup_logger('EDA_pipeline','logs/EDA_pipeline.log',level=logging.INFO)
 
 
 # -------numeric columns-----------
-def numeric_columns(df: pd.DataFrame):
-    '''Returns numeric columns, together with their minimum and maximum values'''
+def numeric_columns(df: pd.DataFrame) -> List[str]:
+    '''Returns numeric columns, together with their minimum and maximum values
+    
+    Args: 
+        df : DataFrame to be analyzed
+
+    Returns:
+        List of numerical values
+    '''
     numeric_cols = df.select_dtypes(include=[np.number]).columns
 
+    log.info("="*50)
+    log.info(f"NUMERICAL COLUMNS")
+    log.info("="*50)
+
     cols = [col for col in numeric_cols[1:]]
-    logging.info(f'\nNumber of Numeric columns : {len(cols)} | Examples : {cols[:3]}\n')
+    log.info(f'\nNumber of Numeric columns : {len(cols)} | Examples : {cols[:3]}\n')
 
     for i,col in enumerate(numeric_cols,1):
-        logging.info(f'\n{i}. {col} - Min: {df[col].min()} - Max: {df[col].max()}\n')
+        log.info(f'\n{i}. {col} | Min: {df[col].min()} | Max: {df[col].max()}\n')
     return numeric_cols
 
 
 # ------------categorical columns---------
-def categorical_columns(df: pd.DataFrame):
-    '''Returns categorical columns and their respective unique values'''
+def categorical_columns(df: pd.DataFrame) -> List[str]:
+    '''Returns categorical columns and their respective unique values
+    
+    Args:
+        df : DataFrame to be analyzed
+        
+    Returns:
+        List of categorical columns
+    '''
     categorical_cols = df.select_dtypes(exclude=[np.number]).columns
 
+    log.info("="*50)
+    log.info(f"CATEGORICAL COLUMNS")
+    log.info("="*50)
+
     cols = [col for col in categorical_cols]
-    logging.info(f'\nNumber of Categorical columns : {len(cols)} | Examples : {cols[:3]}\n')
+    log.info(f'\nNumber of Categorical columns : {len(cols)} | Examples : {cols[:3]}\n')
 
     for i, col in enumerate(categorical_cols,1):
         uniques = df[col].unique()
-        logging.info(f'\n{i}. {col} - Unique: {df[col].nunique()} | Examples : {uniques[:3]}\n')
+        log.info(f'\n{i}. {col} - Unique: {df[col].nunique()} | Examples : {uniques[:3]}\n')
     return categorical_cols
 
 
@@ -90,27 +90,55 @@ def categorical_columns(df: pd.DataFrame):
 
 
 #missing data
-def missing_data(df: pd.DataFrame):
+def missing_data(df: pd.DataFrame) -> Optional[pd.DataFrame]:
     '''Returns the sum of missing data alongside the percentage of 
     missing values with proportion to the length of the dataframe
+
+    Args:
+        df: DataFrame to be analyzed
+
+    Returns:
+        A dataFrame of missing values and respective percentages
+        or None if no missing data
     '''
+    if df.empty:
+        log.warning(f'❌DataFrame is empty!')
+        raise ValueError(f'❌DataFrame is empty!')
+    
     missing = df.isnull().sum()
     missing = missing[missing>0].sort_values(ascending=False)
     missing_pct = missing / len(df) * 100
-    logging.info(f'\nMissing Data \n')
+
+    log.info("="*50)
+    log.info(f"MISSING DATA")
+    log.info("="*50)
+
     missing_df = pd.DataFrame({
         'missing value' : missing,
         'missing pct' : missing_pct.round(2)
     })
+    log.info(f'Columns with missing data: {missing_df.index.tolist()}')
     return missing_df
 
 #------duplicated rows--------
-def duplicate(df: pd.DataFrame):
-    '''Returns the duplicates found in the dataset'''
+def duplicate(df: pd.DataFrame) -> Optional[pd.DataFrame]:
+    '''Returns the duplicates found in the dataset
+    
+    Args:
+        df : DataFrame to analyze
+    
+    Returns:
+        A dataframe of duplicate rows or None if no duplicates'''
+    if df.empty:
+        log.warning(f'❌DataFrame is empty!')
+        raise ValueError(f'❌DataFrame is empty!')
+    
+
     duplicates  =  df[df.duplicated()]
-    logging.info(f'\nNumber of duplicates : {len(duplicates)}\n')
+    log.info(f'\nNumber of duplicates : {len(duplicates)}\n')
+
     if len(duplicates) == 0:
-        logging.info(f'No duplicates found\n')
+        log.info(f'No duplicates found\n')
     else:
         return duplicates
     
@@ -118,9 +146,16 @@ def duplicate(df: pd.DataFrame):
 
 
 # ---------outlier detection using IQR--------
-def check_outlier(df: pd.DataFrame, col: str):
+def check_outlier(df: pd.DataFrame, col: str) -> tuple:
     '''
         Detects outliers in numeric columns using IQR
+
+    Args:
+        df: DataFrame to be analyzed
+        col: Column to be analzyed for outliers
+
+    Returns:
+        A tuple of outliers, lower range and upper range values
     '''
     Q1 = df[col].quantile(0.25)
     Q3 = df[col].quantile(0.75)
@@ -133,10 +168,13 @@ def check_outlier(df: pd.DataFrame, col: str):
     return outliers, lower_bound, upper_bound
 
 
-
 def outlier_summary(df: pd.DataFrame, numeric_cols: list[str]):
     result = []
-    logging.info('Outlier Summary\n')
+
+    log.info("="*50)
+    log.info(f"OUTLIER SUMMARY")
+    log.info("="*50)
+
     for i,col in enumerate(numeric_cols,1):
         outlier, lower, upper = check_outlier(df, col)
         result .append({
@@ -150,21 +188,6 @@ def outlier_summary(df: pd.DataFrame, numeric_cols: list[str]):
     return summary_df
 
 
-
-
-def one_hot_encode(df: pd.DataFrame, categorical_columns):
-    '''One hot encode all categorical columns'''
-    return pd.get_dummies(data=df, columns=categorical_columns,dtype=float)
-
-
-
-import os
-def save_summary(df: pd.DataFrame, name: str):
-    os.makedirs('eda_reports',exist_ok=True)
-    path = f'eda_reports/{name}.csv'
-    df.to_csv(path, index=False)
-    logging.info(f'Saved report: {path}')
-
 def autoviz_report(
         df: pd.DataFrame = None,
         filename: str = None,
@@ -177,12 +200,12 @@ def autoviz_report(
         Saves HTML plots in the specified output directory. 
     '''
     os.makedirs(output_dir,exist_ok=True)
-    logging.info(f'Running AutoViz eda....Output directory : {output_dir}')
+    log.info(f'Running AutoViz eda....Output directory : {output_dir}')
 
     AV = AutoViz_Class()
     # ---- if a dataframe is passed---
     if df is not None:
-        logging.info(f'Using in-memory dataframe with {df.shape[0]} rows and {df.shape[1]} columns')
+        log.info(f'Using in-memory dataframe with {df.shape[0]} rows and {df.shape[1]} columns')
         dft = AV.AutoViz(
             filename='',
             depVar=target,
@@ -206,49 +229,12 @@ def autoviz_report(
     else:
         raise ValueError('You must either provide a dataframe or a filepath!')
     
-    logging.info(f'Autoviz EDA completed. Reports saved successfully')
+    log.info(f'Autoviz EDA completed. Reports saved successfully')
     return dft
 
 
 def run_eda(filepath: str = '../data/e-commerce.csv'):
-    df = load_data(filepath)
-    overview = dataset_overview(df)
-    num_cols = numeric_columns(df)
-    cat_cols = categorical_columns(df)
 
-    if 'CouponUsed' in df.columns:
-        df['CouponUsed'].fillna(0,inplace=True)
-
-    if 'HourSpendOnApp' in df.columns:
-        df['HourSpendOnApp'].fillna(df['HourSpendOnApp'].mean(), inplace=True)
-    
-    if 'WarehouseToHome' in df.columns:
-        df = df.query('WarehouseToHome <= 36')
-
-    if 'Tenure' in df.columns:
-        df['Tenure'].fillna(df['Tenure'].median(), inplace=True)
-
-    if 'DaySinceLastOrder' in df.columns:
-        df['DaySinceLastOrder'].fillna(df['DaySinceLastOrder'].median(), inplace=True)
-    
-    if 'OrderAmountHikeFromlastYear' in df.columns:
-        df['OrderAmountHikeFromlastYear'].fillna(df['OrderAmountHikeFromlastYear'].mean(), inplace=True)
-
-    if 'OrderCount' in df.columns:
-        df['OrderCount'].fillna(df['OrderCount'].mean(), inplace=True)
-
-    missing = missing_data(df)
-    duplicates = duplicate(df)
-    outliers = outlier_summary(df, num_cols)
-    df = one_hot_encode(df, cat_cols)
-    dft = autoviz_report()
-    logging.info(f'EDA completed successfully!')
-
-    save_summary(overview,'overview')
-    save_summary(missing, 'missing_data')
-    save_summary(outliers, 'outlier_summary')
-    if duplicates is not None:
-        save_summary(duplicates,'duplicates')
     
     print({
         'data' : df,

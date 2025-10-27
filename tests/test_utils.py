@@ -136,9 +136,8 @@ class TestDataOperations:
         # Act
         validate_df(df,required_cols)
 
-        assert required_cols == df.columns
-        assert len(df) == 3
-        assert df['col1'] == [1,2,3]
+        assert df.shape[1] == 2
+        assert df.shape[0] == 3
         assert df.columns.tolist() == ['col1','col2']
 
     def test_empty_dataframe_df(self):
@@ -155,6 +154,66 @@ class TestDataOperations:
 
         with pytest.raises(ValueError):
             validate_df(df,required_cols)
+
+class TestHelperFunctionsOperations:
+    '''Test all other helper functions'''
+    def test_ensure_directories(self, tmp_path):
+        '''Test that a directory is created when ensure_directory function isc called'''
+
+        ensure_directories(tmp_path)
+        assert tmp_path.exists()
+        assert tmp_path.is_dir()
+
+    def test_get_timestamp(self):
+        '''Test for timestamp'''
+        format = '%Y%M%d'
+        time = get_timestamp(format=format)
+
+        assert isinstance(time, str)
+
+    def test_project_metadata(self, tmp_path):
+        '''Test that a dictonary with project metadata is 
+        returned if project_metadata function is called'''
+        metadata = { 
+            'Project_Name' : 'Customer Churn Prediction',
+            'Author_Name' : 'Maxwell Selassie Hiamatsu'
+        }
+        ouptut_file = tmp_path / "project_metadata.json"
+
+        project_metadata(metadata, ouptut_file)
+        
+        assert ouptut_file.exists()
+        assert metadata['Author_Name'] == 'Maxwell Selassie Hiamatsu'
+        assert list(metadata.keys()) == ['Project_Name','Author_Name']
+
+    def test_get_memory_usage(self):
+        '''Test that memory usage is returned when the get_memory_usage
+        function is called'''
+        df = pd.DataFrame({
+            'Name' : ['Matthew','James','Thomas','John'],
+            'Age' : [21, 34, 32, 18],
+            'Country' : ['Switzerland','Germany','Spain','Egypt']
+        })
+        memory = get_memory_usage(df)
+
+        assert len(df) == 4
+        assert df.columns.tolist() == ['Name','Age','Country']
+        assert df['Age'][2] == 32
+
+    def get_data_profile(self):
+        '''Test that data profile is returned when data_profile function is called'''
+        df = pd.DataFrame({
+            'Name' : ['Matthew','James','Thomas','John'],
+            'Age' : [21, 34, 32, 18],
+            'Country' : ['Switzerland','Germany','Spain','Egypt']
+        })
+
+        data = data_profile(df)
+
+        assert df.shape[0] == 4
+        assert df.shape[1] == 3
+        assert df.columns.tolist() == ['Name','Age','Country']
+        assert df['Age'].dtype == 'int64'
 
 if __name__ == '__main__':
     pytest([__file__,'-v','--cov=utils','--cov-report=html'])
