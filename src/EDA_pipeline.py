@@ -161,6 +161,27 @@ def duplicate(df: pd.DataFrame) -> Optional[pd.DataFrame]:
     else:
         return duplicates
     
+def plt_histogram(df: pd.DataFrame, numeric_col: List[str]) -> None:
+    '''Plot distributions of numeric columns
+    
+    Args:
+        df: Data to be plotted
+        numeric_col: column to be plotted
+    '''
+    for col in numeric_col:
+        plt.figure(figsize=(20,15))    
+        sns.histplot(data=df, x= col, kde=True, color='indigo', alpha=0.7)
+        plt.title(f'Distribution of {col.title()}', fontsize=14, fontweight='bold')
+        plt.ylabel(f'Frequency', fontsize=12)
+        plt.xlabel(f'{col}', fontsize=12)
+        plt.grid(True, alpha= 0.4)
+        plt.tight_layout()
+
+        output_dir = f'plots/{col}.png'
+        plt.savefig(output_dir, dpi=300, bbox_inches='tight')
+        plt.show()
+        log.info(f'{col} histogram plots saved to {output_dir}')
+        plt.close()
 
 # ---------outlier detection using IQR--------
 def check_outlier(df: pd.DataFrame, col: str) -> tuple:
@@ -319,6 +340,7 @@ def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
 
     # visualization
     plt_missing_values(missing)
+    plt_histogram(df, numeric_cols)
 
     duplicates = duplicate(df)
     save_json_file(duplicates, 'data/duplicated_data.json')

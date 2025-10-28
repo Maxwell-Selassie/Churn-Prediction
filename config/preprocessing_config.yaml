@@ -1,0 +1,38 @@
+# ==============================
+# PREPROCESSING CONFIGURATION
+# ==============================
+# This file documents all preprocessing decisions based on EDA findings
+# Every decision here is based on EDA analysis
+
+# ==============================
+# PROJECT METADATA
+# ==============================
+# Author : Maxwell Selassie Hiamatsu
+# Date : 28 / 10 / 2025
+# Dataset : e-commerce.csv
+# EDA version : 1.0
+
+# ==============================
+
+project:
+  name: 'Maxwell Selassie Hiamatsu'
+  version: 1.0
+  description: Customer Churn Prediction 
+
+# file paths
+file_paths:
+  raw_data: 'data/raw/e-commerce.csv'
+  preprocessed_data: 'data/processed/cleaned_e-commerce.csv'
+  scalar_path: 'models/scalar.pkl'
+  encoder_path: 'models/encoder.pkl'
+
+# Columns to drop
+columns_to_drop:
+  action: 'CustomerID'
+  reason: 'An identifier. Not predictive'
+  eda_evidence: 'numeric_columns shows all categorical columns have less than 10 unique values'
+
+# handle missing values
+missing_values:
+  name: 'DaySinceLastOrder'
+  method: ''
