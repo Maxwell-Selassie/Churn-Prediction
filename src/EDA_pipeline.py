@@ -130,7 +130,7 @@ def plt_missing_values(missing_summary : pd.DataFrame) -> None:
                 title='Distribution of missing values',
                 xlabel='Frequency',color='indigo')
         
-        output_path = f'plots_missing_values.png'
+        output_path = f'plots/plots_missing_values.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         log.info(f'Missing values plot successfully plotted and saved to {output_path}')
         plt.show()
