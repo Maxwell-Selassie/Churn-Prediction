@@ -30,9 +30,30 @@ file_paths:
 columns_to_drop:
   action: 'CustomerID'
   reason: 'An identifier. Not predictive'
-  eda_evidence: 'numeric_columns shows all categorical columns have less than 10 unique values'
+  eda_evidence: 'CustomerID.png showed a non-predictive pattern'
 
 # handle missing values
 missing_values:
-  name: 'DaySinceLastOrder'
-  method: ''
+  DaySinceLastOrder:
+    method: 'median'
+    reason: 'Distribution is right-skewed - sensitive to outliers, hence, median imputation'
+    eda_evidence: 'DaySinceLastOrder.png showed distribution is right-skewed. 
+                  Hence, we imputation is the median of the distribution'
+
+  OrderAmountHikeFromlastYear:
+    method: 'median'
+    reason: 'Distribution is slightly skewed to the right - hence median imputation'
+    eda_evidence: 'OrderHikeAmountFromlastYear.png showed distribution is skewed to the right'
+
+  Tenure:
+    method: 'median'
+    reason: 'Distribution is very skewed to the right - hence median imputation'
+    eda_evidence: 'Tenure.png showed distribution is heavily skewed to the right'
+
+  OrderCount:
+    method: 'median'
+    reason: 'Distribution is very heavily skewed to the right - hence median imputation'
+    eda_evidence: 'OrderCount.png showed distribution is heavily skewed to the right'
+
+  CouponUsed:
+  method: 

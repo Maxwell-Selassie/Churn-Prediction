@@ -573,3 +573,542 @@ Number of duplicates : 0
 2025-10-28 10:37:01 - INFO : Autoviz EDA completed. Reports saved successfully
 2025-10-28 10:37:01 - INFO : ==================================================
 2025-10-28 10:37:01 - INFO : ==================================================
+2025-10-28 14:35:05 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : NUMERICAL COLUMNS
+2025-10-28 14:35:06 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-28 14:35:06 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-28 14:35:06 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-28 14:35:06 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-28 14:35:06 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-28 14:35:06 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-28 14:35:06 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-28 14:35:06 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-28 14:35:06 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-28 14:35:06 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-28 14:35:06 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-28 14:35:06 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-28 14:35:06 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-28 14:35:06 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-28 14:35:06 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-28 14:35:06 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-28 14:35:06 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : CATEGORICAL COLUMNS
+2025-10-28 14:35:06 - INFO : ==================================================
+2025-10-28 14:35:06 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-28 14:35:06 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-28 14:35:06 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-28 14:35:06 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-28 14:35:06 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-28 14:35:06 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-28 14:35:06 - INFO : Dataset shape: (5630, 20), Missing columns: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-28 14:35:07 - INFO : Missing values plot successfully plotted and saved to plots/plots_missing_values.png
+2025-10-28 14:35:10 - INFO : CustomerID histogram plots saved to plots/CustomerID.png
+2025-10-28 14:35:13 - INFO : Churn histogram plots saved to plots/Churn.png
+2025-10-28 14:35:15 - INFO : Tenure histogram plots saved to plots/Tenure.png
+2025-10-28 14:35:17 - INFO : CityTier histogram plots saved to plots/CityTier.png
+2025-10-28 14:35:20 - INFO : WarehouseToHome histogram plots saved to plots/WarehouseToHome.png
+2025-10-28 14:35:23 - INFO : HourSpendOnApp histogram plots saved to plots/HourSpendOnApp.png
+2025-10-28 14:35:25 - INFO : NumberOfDeviceRegistered histogram plots saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:35:27 - INFO : SatisfactionScore histogram plots saved to plots/SatisfactionScore.png
+2025-10-28 14:35:30 - INFO : NumberOfAddress histogram plots saved to plots/NumberOfAddress.png
+2025-10-28 14:35:32 - INFO : Complain histogram plots saved to plots/Complain.png
+2025-10-28 14:35:35 - INFO : OrderAmountHikeFromlastYear histogram plots saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:35:38 - INFO : CouponUsed histogram plots saved to plots/CouponUsed.png
+2025-10-28 14:35:40 - INFO : OrderCount histogram plots saved to plots/OrderCount.png
+2025-10-28 14:35:42 - INFO : DaySinceLastOrder histogram plots saved to plots/DaySinceLastOrder.png
+2025-10-28 14:35:46 - INFO : CashbackAmount histogram plots saved to plots/CashbackAmount.png
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : NUMERICAL COLUMNS
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-28 14:36:27 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-28 14:36:27 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-28 14:36:27 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-28 14:36:27 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-28 14:36:27 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-28 14:36:27 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-28 14:36:27 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-28 14:36:27 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-28 14:36:27 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-28 14:36:27 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-28 14:36:27 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-28 14:36:27 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-28 14:36:27 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-28 14:36:27 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-28 14:36:27 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : CATEGORICAL COLUMNS
+2025-10-28 14:36:27 - INFO : ==================================================
+2025-10-28 14:36:27 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-28 14:36:27 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-28 14:36:27 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-28 14:36:27 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-28 14:36:27 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-28 14:36:27 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-28 14:36:27 - INFO : Dataset shape: (5630, 20), Missing columns: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-28 14:36:28 - INFO : Missing values plot successfully plotted and saved to plots/plots_missing_values.png
+2025-10-28 14:36:31 - INFO : CustomerID histogram plots saved to plots/CustomerID.png
+2025-10-28 14:36:33 - INFO : Churn histogram plots saved to plots/Churn.png
+2025-10-28 14:36:36 - INFO : Tenure histogram plots saved to plots/Tenure.png
+2025-10-28 14:36:38 - INFO : CityTier histogram plots saved to plots/CityTier.png
+2025-10-28 14:36:41 - INFO : WarehouseToHome histogram plots saved to plots/WarehouseToHome.png
+2025-10-28 14:36:43 - INFO : HourSpendOnApp histogram plots saved to plots/HourSpendOnApp.png
+2025-10-28 14:36:46 - INFO : NumberOfDeviceRegistered histogram plots saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:36:48 - INFO : SatisfactionScore histogram plots saved to plots/SatisfactionScore.png
+2025-10-28 14:36:51 - INFO : NumberOfAddress histogram plots saved to plots/NumberOfAddress.png
+2025-10-28 14:36:53 - INFO : Complain histogram plots saved to plots/Complain.png
+2025-10-28 14:36:56 - INFO : OrderAmountHikeFromlastYear histogram plots saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:36:59 - INFO : CouponUsed histogram plots saved to plots/CouponUsed.png
+2025-10-28 14:37:02 - INFO : OrderCount histogram plots saved to plots/OrderCount.png
+2025-10-28 14:37:04 - INFO : DaySinceLastOrder histogram plots saved to plots/DaySinceLastOrder.png
+2025-10-28 14:37:07 - INFO : CashbackAmount histogram plots saved to plots/CashbackAmount.png
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : NUMERICAL COLUMNS
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-28 14:37:40 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-28 14:37:40 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-28 14:37:40 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-28 14:37:40 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-28 14:37:40 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-28 14:37:40 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-28 14:37:40 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-28 14:37:40 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-28 14:37:40 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-28 14:37:40 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-28 14:37:40 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-28 14:37:40 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-28 14:37:40 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-28 14:37:40 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-28 14:37:40 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : CATEGORICAL COLUMNS
+2025-10-28 14:37:40 - INFO : ==================================================
+2025-10-28 14:37:40 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-28 14:37:40 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-28 14:37:40 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-28 14:37:40 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-28 14:37:40 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-28 14:37:40 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-28 14:37:40 - INFO : Dataset shape: (5630, 20), Missing columns: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-28 14:37:41 - INFO : Missing values plot successfully plotted and saved to plots/plots_missing_values.png
+2025-10-28 14:37:44 - INFO : CustomerID histogram plots saved to plots/CustomerID.png
+2025-10-28 14:37:46 - INFO : Churn histogram plots saved to plots/Churn.png
+2025-10-28 14:37:49 - INFO : Tenure histogram plots saved to plots/Tenure.png
+2025-10-28 14:37:51 - INFO : CityTier histogram plots saved to plots/CityTier.png
+2025-10-28 14:37:54 - INFO : WarehouseToHome histogram plots saved to plots/WarehouseToHome.png
+2025-10-28 14:37:56 - INFO : HourSpendOnApp histogram plots saved to plots/HourSpendOnApp.png
+2025-10-28 14:37:58 - INFO : NumberOfDeviceRegistered histogram plots saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:38:01 - INFO : SatisfactionScore histogram plots saved to plots/SatisfactionScore.png
+2025-10-28 14:38:03 - INFO : NumberOfAddress histogram plots saved to plots/NumberOfAddress.png
+2025-10-28 14:38:06 - INFO : Complain histogram plots saved to plots/Complain.png
+2025-10-28 14:38:08 - INFO : OrderAmountHikeFromlastYear histogram plots saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:38:12 - INFO : CouponUsed histogram plots saved to plots/CouponUsed.png
+2025-10-28 14:38:14 - INFO : OrderCount histogram plots saved to plots/OrderCount.png
+2025-10-28 14:38:17 - INFO : DaySinceLastOrder histogram plots saved to plots/DaySinceLastOrder.png
+2025-10-28 14:38:19 - INFO : CashbackAmount histogram plots saved to plots/CashbackAmount.png
+2025-10-28 14:38:24 - INFO : Correlation matrix plot successfully save to plots/correlation_matrix.png
+2025-10-28 14:38:26 - INFO : CustomerID boxplot successfully saved to plots/CustomerID.png
+2025-10-28 14:38:27 - INFO : Churn boxplot successfully saved to plots/Churn.png
+2025-10-28 14:38:27 - INFO : Tenure boxplot successfully saved to plots/Tenure.png
+2025-10-28 14:38:28 - INFO : CityTier boxplot successfully saved to plots/CityTier.png
+2025-10-28 14:38:29 - INFO : WarehouseToHome boxplot successfully saved to plots/WarehouseToHome.png
+2025-10-28 14:38:30 - INFO : HourSpendOnApp boxplot successfully saved to plots/HourSpendOnApp.png
+2025-10-28 14:38:31 - INFO : NumberOfDeviceRegistered boxplot successfully saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:38:32 - INFO : SatisfactionScore boxplot successfully saved to plots/SatisfactionScore.png
+2025-10-28 14:38:33 - INFO : NumberOfAddress boxplot successfully saved to plots/NumberOfAddress.png
+2025-10-28 14:38:34 - INFO : Complain boxplot successfully saved to plots/Complain.png
+2025-10-28 14:38:35 - INFO : OrderAmountHikeFromlastYear boxplot successfully saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:38:36 - INFO : CouponUsed boxplot successfully saved to plots/CouponUsed.png
+2025-10-28 14:38:37 - INFO : OrderCount boxplot successfully saved to plots/OrderCount.png
+2025-10-28 14:38:38 - INFO : DaySinceLastOrder boxplot successfully saved to plots/DaySinceLastOrder.png
+2025-10-28 14:38:39 - INFO : CashbackAmount boxplot successfully saved to plots/CashbackAmount.png
+2025-10-28 14:38:39 - INFO : 
+Number of duplicates : 0
+
+2025-10-28 14:38:39 - INFO : No duplicates found
+
+2025-10-28 14:38:39 - INFO : ==================================================
+2025-10-28 14:38:39 - INFO : OUTLIER SUMMARY
+2025-10-28 14:38:39 - INFO : ==================================================
+2025-10-28 14:38:39 - INFO : Running AutoViz eda....Output directory : autoviz_reports
+2025-10-28 14:38:39 - INFO : Using in-memory dataframe with 5630 rows and 20 columns
+2025-10-28 14:41:18 - INFO : Autoviz EDA completed. Reports saved successfully
+2025-10-28 14:41:18 - INFO : ==================================================
+2025-10-28 14:41:18 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : NUMERICAL COLUMNS
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-28 14:44:36 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-28 14:44:36 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-28 14:44:36 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-28 14:44:36 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-28 14:44:36 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-28 14:44:36 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-28 14:44:36 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-28 14:44:36 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-28 14:44:36 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-28 14:44:36 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-28 14:44:36 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-28 14:44:36 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-28 14:44:36 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-28 14:44:36 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-28 14:44:36 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : CATEGORICAL COLUMNS
+2025-10-28 14:44:36 - INFO : ==================================================
+2025-10-28 14:44:36 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-28 14:44:36 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-28 14:44:36 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-28 14:44:36 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-28 14:44:36 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-28 14:44:36 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-28 14:44:36 - INFO : Dataset shape: (5630, 20), Missing columns: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-28 14:44:37 - INFO : Missing values plot successfully plotted and saved to plots/plots_missing_values.png
+2025-10-28 14:44:40 - INFO : CustomerID histogram plots saved to plots/CustomerID.png
+2025-10-28 14:44:42 - INFO : Churn histogram plots saved to plots/Churn.png
+2025-10-28 14:44:45 - INFO : Tenure histogram plots saved to plots/Tenure.png
+2025-10-28 14:44:47 - INFO : CityTier histogram plots saved to plots/CityTier.png
+2025-10-28 14:44:50 - INFO : WarehouseToHome histogram plots saved to plots/WarehouseToHome.png
+2025-10-28 14:44:52 - INFO : HourSpendOnApp histogram plots saved to plots/HourSpendOnApp.png
+2025-10-28 14:44:55 - INFO : NumberOfDeviceRegistered histogram plots saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:44:58 - INFO : SatisfactionScore histogram plots saved to plots/SatisfactionScore.png
+2025-10-28 14:45:00 - INFO : NumberOfAddress histogram plots saved to plots/NumberOfAddress.png
+2025-10-28 14:45:03 - INFO : Complain histogram plots saved to plots/Complain.png
+2025-10-28 14:45:05 - INFO : OrderAmountHikeFromlastYear histogram plots saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:45:08 - INFO : CouponUsed histogram plots saved to plots/CouponUsed.png
+2025-10-28 14:45:10 - INFO : OrderCount histogram plots saved to plots/OrderCount.png
+2025-10-28 14:45:13 - INFO : DaySinceLastOrder histogram plots saved to plots/DaySinceLastOrder.png
+2025-10-28 14:45:15 - INFO : CashbackAmount histogram plots saved to plots/CashbackAmount.png
+2025-10-28 14:45:20 - INFO : Correlation matrix plot successfully save to plots/correlation_matrix.png
+2025-10-28 14:45:21 - INFO : CustomerID boxplot successfully saved to plots/CustomerID.png
+2025-10-28 14:45:22 - INFO : Churn boxplot successfully saved to plots/Churn.png
+2025-10-28 14:45:23 - INFO : Tenure boxplot successfully saved to plots/Tenure.png
+2025-10-28 14:45:24 - INFO : CityTier boxplot successfully saved to plots/CityTier.png
+2025-10-28 14:45:25 - INFO : WarehouseToHome boxplot successfully saved to plots/WarehouseToHome.png
+2025-10-28 14:45:26 - INFO : HourSpendOnApp boxplot successfully saved to plots/HourSpendOnApp.png
+2025-10-28 14:45:27 - INFO : NumberOfDeviceRegistered boxplot successfully saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:45:28 - INFO : SatisfactionScore boxplot successfully saved to plots/SatisfactionScore.png
+2025-10-28 14:45:29 - INFO : NumberOfAddress boxplot successfully saved to plots/NumberOfAddress.png
+2025-10-28 14:45:29 - INFO : Complain boxplot successfully saved to plots/Complain.png
+2025-10-28 14:45:31 - INFO : OrderAmountHikeFromlastYear boxplot successfully saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:45:32 - INFO : CouponUsed boxplot successfully saved to plots/CouponUsed.png
+2025-10-28 14:45:33 - INFO : OrderCount boxplot successfully saved to plots/OrderCount.png
+2025-10-28 14:45:33 - INFO : DaySinceLastOrder boxplot successfully saved to plots/DaySinceLastOrder.png
+2025-10-28 14:45:35 - INFO : CashbackAmount boxplot successfully saved to plots/CashbackAmount.png
+2025-10-28 14:45:35 - INFO : 
+Number of duplicates : 0
+
+2025-10-28 14:45:35 - INFO : No duplicates found
+
+2025-10-28 14:45:35 - INFO : ==================================================
+2025-10-28 14:45:35 - INFO : OUTLIER SUMMARY
+2025-10-28 14:45:35 - INFO : ==================================================
+2025-10-28 14:45:35 - INFO : Running AutoViz eda....Output directory : autoviz_reports
+2025-10-28 14:45:35 - INFO : Using in-memory dataframe with 5630 rows and 20 columns
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : NUMERICAL COLUMNS
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : 
+Number of Numeric columns : 14 | Examples : ['Churn', 'Tenure', 'CityTier']
+
+2025-10-28 14:48:01 - INFO : 
+1. CustomerID | Min: 50001 | Max: 55630
+
+2025-10-28 14:48:01 - INFO : 
+2. Churn | Min: 0 | Max: 1
+
+2025-10-28 14:48:01 - INFO : 
+3. Tenure | Min: 0.0 | Max: 61.0
+
+2025-10-28 14:48:01 - INFO : 
+4. CityTier | Min: 1 | Max: 3
+
+2025-10-28 14:48:01 - INFO : 
+5. WarehouseToHome | Min: 5.0 | Max: 127.0
+
+2025-10-28 14:48:01 - INFO : 
+6. HourSpendOnApp | Min: 0.0 | Max: 5.0
+
+2025-10-28 14:48:01 - INFO : 
+7. NumberOfDeviceRegistered | Min: 1 | Max: 6
+
+2025-10-28 14:48:01 - INFO : 
+8. SatisfactionScore | Min: 1 | Max: 5
+
+2025-10-28 14:48:01 - INFO : 
+9. NumberOfAddress | Min: 1 | Max: 22
+
+2025-10-28 14:48:01 - INFO : 
+10. Complain | Min: 0 | Max: 1
+
+2025-10-28 14:48:01 - INFO : 
+11. OrderAmountHikeFromlastYear | Min: 11.0 | Max: 26.0
+
+2025-10-28 14:48:01 - INFO : 
+12. CouponUsed | Min: 0.0 | Max: 16.0
+
+2025-10-28 14:48:01 - INFO : 
+13. OrderCount | Min: 1.0 | Max: 16.0
+
+2025-10-28 14:48:01 - INFO : 
+14. DaySinceLastOrder | Min: 0.0 | Max: 46.0
+
+2025-10-28 14:48:01 - INFO : 
+15. CashbackAmount | Min: 0 | Max: 325
+
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : CATEGORICAL COLUMNS
+2025-10-28 14:48:01 - INFO : ==================================================
+2025-10-28 14:48:01 - INFO : 
+Number of Categorical columns : 5 | Examples : ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender']
+
+2025-10-28 14:48:01 - INFO : 
+1. PreferredLoginDevice - Unique: 3 | Examples : ['Mobile Phone' 'Phone' 'Computer']
+
+2025-10-28 14:48:01 - INFO : 
+2. PreferredPaymentMode - Unique: 7 | Examples : ['Debit Card' 'UPI' 'CC']
+
+2025-10-28 14:48:01 - INFO : 
+3. Gender - Unique: 2 | Examples : ['Female' 'Male']
+
+2025-10-28 14:48:01 - INFO : 
+4. PreferedOrderCat - Unique: 6 | Examples : ['Laptop & Accessory' 'Mobile' 'Mobile Phone']
+
+2025-10-28 14:48:01 - INFO : 
+5. MaritalStatus - Unique: 3 | Examples : ['Single' 'Divorced' 'Married']
+
+2025-10-28 14:48:01 - INFO : Dataset shape: (5630, 20), Missing columns: ['DaySinceLastOrder', 'OrderAmountHikeFromlastYear', 'Tenure', 'OrderCount', 'CouponUsed', 'HourSpendOnApp', 'WarehouseToHome']
+2025-10-28 14:48:02 - INFO : Missing values plot successfully plotted and saved to plots/plots_missing_values.png
+2025-10-28 14:48:05 - INFO : CustomerID histogram plots saved to plots/CustomerID.png
+2025-10-28 14:48:08 - INFO : Churn histogram plots saved to plots/Churn.png
+2025-10-28 14:48:10 - INFO : Tenure histogram plots saved to plots/Tenure.png
+2025-10-28 14:48:12 - INFO : CityTier histogram plots saved to plots/CityTier.png
+2025-10-28 14:48:14 - INFO : WarehouseToHome histogram plots saved to plots/WarehouseToHome.png
+2025-10-28 14:48:17 - INFO : HourSpendOnApp histogram plots saved to plots/HourSpendOnApp.png
+2025-10-28 14:48:18 - INFO : NumberOfDeviceRegistered histogram plots saved to plots/NumberOfDeviceRegistered.png
+2025-10-28 14:48:21 - INFO : SatisfactionScore histogram plots saved to plots/SatisfactionScore.png
+2025-10-28 14:48:23 - INFO : NumberOfAddress histogram plots saved to plots/NumberOfAddress.png
+2025-10-28 14:48:25 - INFO : Complain histogram plots saved to plots/Complain.png
+2025-10-28 14:48:28 - INFO : OrderAmountHikeFromlastYear histogram plots saved to plots/OrderAmountHikeFromlastYear.png
+2025-10-28 14:48:30 - INFO : CouponUsed histogram plots saved to plots/CouponUsed.png
+2025-10-28 14:48:32 - INFO : OrderCount histogram plots saved to plots/OrderCount.png
+2025-10-28 14:48:35 - INFO : DaySinceLastOrder histogram plots saved to plots/DaySinceLastOrder.png
+2025-10-28 14:48:37 - INFO : CashbackAmount histogram plots saved to plots/CashbackAmount.png
+2025-10-28 14:48:41 - INFO : Correlation matrix plot successfully save to plots/correlation_matrix.png
+2025-10-28 14:48:43 - INFO : CustomerID boxplot successfully saved to plots/CustomerID_boxplot.png
+2025-10-28 14:48:43 - INFO : Churn boxplot successfully saved to plots/Churn_boxplot.png
+2025-10-28 14:48:44 - INFO : Tenure boxplot successfully saved to plots/Tenure_boxplot.png
+2025-10-28 14:48:46 - INFO : CityTier boxplot successfully saved to plots/CityTier_boxplot.png
+2025-10-28 14:48:47 - INFO : WarehouseToHome boxplot successfully saved to plots/WarehouseToHome_boxplot.png
+2025-10-28 14:48:48 - INFO : HourSpendOnApp boxplot successfully saved to plots/HourSpendOnApp_boxplot.png
+2025-10-28 14:48:49 - INFO : NumberOfDeviceRegistered boxplot successfully saved to plots/NumberOfDeviceRegistered_boxplot.png
+2025-10-28 14:48:50 - INFO : SatisfactionScore boxplot successfully saved to plots/SatisfactionScore_boxplot.png
+2025-10-28 14:48:51 - INFO : NumberOfAddress boxplot successfully saved to plots/NumberOfAddress_boxplot.png
+2025-10-28 14:48:52 - INFO : Complain boxplot successfully saved to plots/Complain_boxplot.png
+2025-10-28 14:48:53 - INFO : OrderAmountHikeFromlastYear boxplot successfully saved to plots/OrderAmountHikeFromlastYear_boxplot.png
+2025-10-28 14:48:54 - INFO : CouponUsed boxplot successfully saved to plots/CouponUsed_boxplot.png
+2025-10-28 14:48:55 - INFO : OrderCount boxplot successfully saved to plots/OrderCount_boxplot.png
+2025-10-28 14:48:56 - INFO : DaySinceLastOrder boxplot successfully saved to plots/DaySinceLastOrder_boxplot.png
+2025-10-28 14:48:57 - INFO : CashbackAmount boxplot successfully saved to plots/CashbackAmount_boxplot.png
+2025-10-28 14:48:57 - INFO : 
+Number of duplicates : 0
+
+2025-10-28 14:48:57 - INFO : No duplicates found
+
+2025-10-28 14:48:57 - INFO : ==================================================
+2025-10-28 14:48:57 - INFO : OUTLIER SUMMARY
+2025-10-28 14:48:57 - INFO : ==================================================
+2025-10-28 14:48:57 - INFO : Running AutoViz eda....Output directory : autoviz_reports
+2025-10-28 14:48:57 - INFO : Using in-memory dataframe with 5630 rows and 20 columns
+2025-10-28 14:51:41 - INFO : Autoviz EDA completed. Reports saved successfully
+2025-10-28 14:51:41 - INFO : ==================================================
+2025-10-28 14:51:41 - INFO : ==================================================

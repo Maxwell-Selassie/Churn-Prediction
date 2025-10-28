@@ -168,6 +168,10 @@ def plt_histogram(df: pd.DataFrame, numeric_col: List[str]) -> None:
         df: Data to be plotted
         numeric_col: column to be plotted
     '''
+    if df.empty:
+        log.warning(f'DataFrame is empty. Cannot plot histogram distributions')
+        raise
+
     for col in numeric_col:
         plt.figure(figsize=(20,15))    
         sns.histplot(data=df, x= col, kde=True, color='indigo', alpha=0.7)
@@ -182,6 +186,56 @@ def plt_histogram(df: pd.DataFrame, numeric_col: List[str]) -> None:
         plt.show()
         log.info(f'{col} histogram plots saved to {output_dir}')
         plt.close()
+
+def plt_heatmap(df: pd.DataFrame) -> None:
+        '''Plot heatmap
+        
+        Args:
+            df: Data to be plotted
+        '''
+        if not df.empty:
+            corr = df.corr(numeric_only=True, method='spearman')
+
+            plt.figure(figsize=(20,17))
+            sns.heatmap(data=corr, annot= True, fmt= '.2f', linecolor='green', cmap='Blues')
+            plt.title('CORRELATION MATRIX')
+
+            output_dir = 'plots/correlation_matrix.png'
+            plt.savefig(output_dir, dpi=300, bbox_inches='tight')
+
+            log.info(f'Correlation matrix plot successfully save to {output_dir}')
+            plt.tight_layout()
+            plt.show()
+            plt.close()
+        else:
+            log.error(f'DataFrame is Empty! Cannot plot correlation matrix')
+            raise
+
+def plt_boxplots(df: pd.DataFrame, numeric_cols: List[str]) -> None:
+    '''Plot boxplots
+    
+    Args:
+        df: Data to be plotted
+        numeric_col: column to be plotted
+    '''
+    if not isinstance(df, pd.DataFrame):
+        log.error('Data must be a pandas DataFrame')
+        raise
+    if not df.empty:
+        for col in numeric_cols:
+            plt.figure(figsize=(12,7))
+            sns.boxplot(data=df, y= col, linecolor='blue', color='green')
+            plt.title(f'Boxplot - {col}')
+            plt.tight_layout()
+            output_dir = f'plots/{col}_boxplot.png'
+            plt.savefig(output_dir, dpi=300, bbox_inches='tight')
+            log.info(f'{col} boxplot successfully saved to {output_dir}')
+            plt.show()
+            plt.close()
+    else:
+        log.error(f'Dataframe is empty! Cannot plot boxplots')
+        raise
+
 
 # ---------outlier detection using IQR--------
 def check_outlier(df: pd.DataFrame, col: str) -> tuple:
@@ -341,6 +395,8 @@ def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
     # visualization
     plt_missing_values(missing)
     plt_histogram(df, numeric_cols)
+    plt_heatmap(df)
+    plt_boxplots(df, numeric_cols)
 
     duplicates = duplicate(df)
     save_json_file(duplicates, 'data/duplicated_data.json')
