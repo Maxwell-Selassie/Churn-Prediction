@@ -28,7 +28,7 @@ file_paths:
 
 # Columns to drop
 columns_to_drop:
-  action: 'CustomerID'
+  name: 'CustomerID'
   reason: 'An identifier. Not predictive'
   eda_evidence: 'CustomerID.png showed a non-predictive pattern'
 
