@@ -74,14 +74,68 @@ missing_values:
   columns_drop_threshold: 0.8
 
 # outlier handling
-method: 'IQR'
+outliers:
+  method: 'IQR'
 
-outlier_columns:
-  Tenure:
-    action: 'none'
-    reason: 'Tenure has 4 outliers which are not extreme outliers' 
-    eda_evidence: 'outliers.csv showed Tenure column has only 4 outliers' 
-  WarehouseToHome:
-    action: 'none'
-    reason: 'WarehouseToHome has only 2 outliers which are not extreme'
-    eda_evidence: 'outliers.csv showed the WarehouseToHome column has only 2 outliers'
+  outlier_columns:
+    Tenure:
+      action: 'none'
+      reason: 'Tenure has 4 outliers which are not extreme outliers' 
+      eda_evidence: 'outliers.csv showed Tenure column has only 4 outliers' 
+
+    WarehouseToHome:
+      action: 'none'
+      reason: 'WarehouseToHome has only 2 outliers which are not extreme'
+      eda_evidence: 'outliers.csv showed the WarehouseToHome column has only 2 outliers'
+
+    HourSpendOnApp:
+      action: 'none'
+      reason: 'HourSpendOnApp has only 6 outliers that are not extreme'
+      eda_evidence: 'outliers.csv showed "HourSpendOnApp" column has 6 outliers'
+
+    NumberOfDeviceRegistered:
+      action: 'none'
+      reason: 'NumberOfDeviceRegistered has 397 outliers, but are not extreme outliers. Values are between 1 and 6'
+      eda_evidence: 'outliers.csv showed "NumberOfDeviceRegistered" column has 397 outliers'
+
+    NumberOfAddress:
+      action: 'none'
+      reason: 'NumberOfAddress has only 4 outliers, but are not extreme outliers'
+      eda_evidence: 'outliers.csv showed "NumberOfAddress" column has 4 outliers' 
+
+    OrderAmountHikeFromlastYear:
+      action: 'none'
+      reason: 'OrderAmountHikeFromlastYear has 33 outliers, but are not extreme outliers. Values are capped at 36.0'
+      eda_evidence: 'outliers.csv showed "OrderAmountHikeFromlastYear" column has 33 outliers' 
+
+    CouponUsed:
+      action: 'none'
+      reason: 'CouponUsed has 629 outliers. Values range from 0 to 16 which seem quite reasonable. Maybe be
+            looked at again during model retraining and evaluation'
+      eda_evidence: 'outliers.csv showed "CouponUsed" column has 629 outliers' 
+
+    OrderCount: 
+      action: 'none'
+      reason: "OrderCount has 703 outliers. Values range from 0 - 16, which is perfectly reasonable
+              considering the column's correlation with CouponUsed"
+      eda_evidence: 'outliers.csv showed "OrderCount" column has 703 outliers' 
+
+    DaySinceLastOrder:
+      action: 'none'
+      reason: 'DaySinceLastOrder has 62 outliers. One unique occurrence of 30.0, but in context, is perfectly reasonable.
+              Maybe be looked at again during model retraining and evaluation'
+      eda_evidence: 'outliers.csv showed "DaySinceLastOrder" has 62 outliers'
+
+    CashbackAmount:
+      action: 'clip'
+      reason: 'CashbackAmount has 447 outliers. Clip values between 60 and 300'
+      eda_evidence: 'outliers.csv showed "CashbackAmount" has 447 outliers.'
+
+iqr_multiplier: 1.5
+
+encoding:
+  one_hot:
+    column:
+    max_categories:
+    reason:
+    eda_evidence:

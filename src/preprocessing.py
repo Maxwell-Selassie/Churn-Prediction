@@ -151,4 +151,27 @@ class DataPreprocesserPipeline():
 
         return df
     
-    
+    def handle_outliers(self, df: pd.DataFrame) -> pd.DataFrame:
+        '''Handle outliers in the dataset'''
+        log.info('='*50)
+        log.info('HANDLING OUTLIERS')
+        log.info('='*50)
+
+        if 'outliers' not in self.config or not self.config['outliers']:
+            log.warning('No outliers in the dataset')
+            return df
+        
+        for col, strategy in self.config['outliers'].items():
+            if col not in df.columns:
+                log.warning(f'-{col} column not found in the dataset')
+                continue
+        
+            action = strategy['action']
+            reason = strategy['reason']
+
+            log.info(f'{col} : Action: {action} | Reason : {reason}')
+
+            if action == 'none':
+                continue
+            elif action == 'cap':
+                df[col] = np.clip()
