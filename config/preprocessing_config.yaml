@@ -56,4 +56,32 @@ missing_values:
     eda_evidence: 'OrderCount.png showed distribution is heavily skewed to the right'
 
   CouponUsed:
-  method: 
+  method: 'median'
+  reason: 'Distribution is rightly skewed with outliers, hence median imputation'
+  eda_evidence: 'CouponUsed.png showed distribution is skewed to the right'
+
+  HourSpendOnApp:
+    method: 'mode'
+    reason: 'Most of the values are 3.0, "Mean" and "Median" are approximately 3.0'
+    eda_evidence: 'HourSpendOnApp.png showed distribution is mostly centered at 3.0'
+
+  WarehouseToHome:
+    method: 'median'
+    reason: 'Distribution is heavily skewed to the right, hence median imputation'
+    eda_evidence: 'WarehouseToHome.png showed distribution is skewed to the right with high outliers'
+
+  # threshold for dropping columns - 80&
+  columns_drop_threshold: 0.8
+
+# outlier handling
+method: 'IQR'
+
+outlier_columns:
+  Tenure:
+    action: 'none'
+    reason: 'Tenure has 4 outliers which are not extreme outliers' 
+    eda_evidence: 'outliers.csv showed Tenure column has only 4 outliers' 
+  WarehouseToHome:
+    action: 'none'
+    reason: 'WarehouseToHome has only 2 outliers which are not extreme'
+    eda_evidence: 'outliers.csv showed the WarehouseToHome column has only 2 outliers'
