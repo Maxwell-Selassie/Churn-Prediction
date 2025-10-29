@@ -174,4 +174,9 @@ class DataPreprocesserPipeline():
             if action == 'none':
                 continue
             elif action == 'cap':
-                df[col] = np.clip()
+                df[col] = np.clip(df[col], a_min=60, a_max=300)
+        log.info('Outliers handled!')
+
+    def encoding_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        '''Encode categorical features'''
+        
