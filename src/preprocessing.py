@@ -9,7 +9,7 @@ from utils import (
     setup_logger, get_timestamp, ensure_directories, read_yaml_file
 )
 
-log = setup_logger(name='preprocessing', log_filename='logs/ preprocessing.log',level=logging.INFO)
+log = setup_logger(name='preprocessing', log_filename='logs/data_preprocessing.log',level=logging.INFO)
 
 class DataPreprocesserPipeline():
     '''Data preprocessing Pipeline driven by YAML configuration
@@ -116,7 +116,7 @@ class DataPreprocesserPipeline():
         missing_before = df.isnull().sum().sum()
         log.info(f"Missing values before : {missing_before}")
 
-        if 'missing_values' in self.config or self.config['missing_values']:
+        if 'missing_values' in self.config and 'numeric' in self.config['missing_values']:
             for col, strategy in self.config['missing_values'].items():
                 if col not in df.columns:
                     log.warning(f'Column "{col}" not in dataFrame')
@@ -179,4 +179,24 @@ class DataPreprocesserPipeline():
 
     def encoding_features(self, df: pd.DataFrame) -> pd.DataFrame:
         '''Encode categorical features'''
+        log.info('='*50)
+        log.info('FEATURE ENCODING')
+        log.info('='*50)
+
+        if not 'encoding' in self.config and not 'one_hot' in self.config['encoding']:
+            log.warning(f'No columns available for encoding')
+            return df
+        
+        for col,strategy in self.config['encoding'].items():
+            if col not in df.columns:
+                log.warning(f'Column "{col}" not found. Skipping...')
+                continue
+
+            drop_first = strategy['drop_first']
+            log.info(f'Encoding "{col} | Drop first = {drop_first}')
+
+            # Perform one-hot encoding
+            dummies = pd.get_dummies(df[col], prefix=col, drop_first=drop_first)
+            df = pd.concat([df, dummies], axis=1)
+            df = df.drop(columns=col)
         

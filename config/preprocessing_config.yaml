@@ -28,47 +28,53 @@ file_paths:
 
 # Columns to drop
 columns_to_drop:
-  name: 'CustomerID'
-  reason: 'An identifier. Not predictive'
-  eda_evidence: 'CustomerID.png showed a non-predictive pattern'
+  - column: 'CustomerID'
+    reason: 'An identifier. Not predictive'
+    eda_evidence: 'CustomerID.png showed a non-predictive pattern'
+
+  - name: 'Churn'
+    reason: 'Target Ouput. Does not undergo preprocessing'
+    eda_evidence: 'none'
 
 # handle missing values
 missing_values:
-  DaySinceLastOrder:
+
+  numeric:
+    DaySinceLastOrder:
+      method: 'median'
+      reason: 'Distribution is right-skewed - sensitive to outliers, hence, median imputation'
+      eda_evidence: 'DaySinceLastOrder.png showed distribution is right-skewed. 
+                    Hence, we imputation is the median of the distribution'
+
+    OrderAmountHikeFromlastYear:
+      method: 'median'
+      reason: 'Distribution is slightly skewed to the right - hence median imputation'
+      eda_evidence: 'OrderHikeAmountFromlastYear.png showed distribution is skewed to the right'
+
+    Tenure:
+      method: 'median'
+      reason: 'Distribution is very skewed to the right - hence median imputation'
+      eda_evidence: 'Tenure.png showed distribution is heavily skewed to the right'
+
+    OrderCount:
+      method: 'median'
+      reason: 'Distribution is very heavily skewed to the right - hence median imputation'
+      eda_evidence: 'OrderCount.png showed distribution is heavily skewed to the right'
+
+    CouponUsed:
     method: 'median'
-    reason: 'Distribution is right-skewed - sensitive to outliers, hence, median imputation'
-    eda_evidence: 'DaySinceLastOrder.png showed distribution is right-skewed. 
-                  Hence, we imputation is the median of the distribution'
+    reason: 'Distribution is rightly skewed with outliers, hence median imputation'
+    eda_evidence: 'CouponUsed.png showed distribution is skewed to the right'
 
-  OrderAmountHikeFromlastYear:
-    method: 'median'
-    reason: 'Distribution is slightly skewed to the right - hence median imputation'
-    eda_evidence: 'OrderHikeAmountFromlastYear.png showed distribution is skewed to the right'
+    HourSpendOnApp:
+      method: 'mode'
+      reason: 'Most of the values are 3.0, "Mean" and "Median" are approximately 3.0'
+      eda_evidence: 'HourSpendOnApp.png showed distribution is mostly centered at 3.0'
 
-  Tenure:
-    method: 'median'
-    reason: 'Distribution is very skewed to the right - hence median imputation'
-    eda_evidence: 'Tenure.png showed distribution is heavily skewed to the right'
-
-  OrderCount:
-    method: 'median'
-    reason: 'Distribution is very heavily skewed to the right - hence median imputation'
-    eda_evidence: 'OrderCount.png showed distribution is heavily skewed to the right'
-
-  CouponUsed:
-  method: 'median'
-  reason: 'Distribution is rightly skewed with outliers, hence median imputation'
-  eda_evidence: 'CouponUsed.png showed distribution is skewed to the right'
-
-  HourSpendOnApp:
-    method: 'mode'
-    reason: 'Most of the values are 3.0, "Mean" and "Median" are approximately 3.0'
-    eda_evidence: 'HourSpendOnApp.png showed distribution is mostly centered at 3.0'
-
-  WarehouseToHome:
-    method: 'median'
-    reason: 'Distribution is heavily skewed to the right, hence median imputation'
-    eda_evidence: 'WarehouseToHome.png showed distribution is skewed to the right with high outliers'
+    WarehouseToHome:
+      method: 'median'
+      reason: 'Distribution is heavily skewed to the right, hence median imputation'
+      eda_evidence: 'WarehouseToHome.png showed distribution is skewed to the right with high outliers'
 
   # threshold for dropping columns - 80&
   columns_drop_threshold: 0.8
@@ -133,9 +139,89 @@ outliers:
 
 iqr_multiplier: 1.5
 
+# @encoding - one-hot encoding
 encoding:
   one_hot:
-    column:
-    max_categories:
-    reason:
-    eda_evidence:
+
+    PreferredDeviceLogin:
+      drop_first: True
+      max_categories: 10
+      reason: 'Only 3 unique values. Best option is to one-hot encode'
+      eda_evidence: 'categorical columns showed 3 unique values'
+
+    PreferredPaymentMode:
+      drop_first: True
+      max_categories: 10
+      reason: 'Only 7 unique values. No ordinal relationships'
+      eda_evidence: 'categorical columns showed 7 unique values'
+
+    Gender:
+      drop_first: True
+      max_categories: 10
+      reason: 'Only 2 unique values. [Female, Male]'
+      eda_evidence: 'categorical column only showed 2 unique values'
+
+    PreferedOrderCat:
+      drop_first: True
+      max_categories: 10
+      reason: 'Only 6 unique values. No ordinal relationships'
+      eda_evidence: 'categorical columns showed 6 unique values'
+
+    MaritalStatus:
+      drop_first: True
+      max_categories: 10
+      reason: 'Only 3 unique values. Best option is to one-hot encode'
+      eda_evidence: 'categorical columns only showed 3 unique values'
+
+# @scaling - standardscaling
+scaling:
+  method: 'standard'
+
+  columns_to_scale:
+    - "Tenure"
+    - "CityTier"
+    - "WarehouseToHome"
+    - "HourSpendOnApp"
+    - "NumberOfDeviceRegistered"
+    - "SatisfactionScore"
+    - "NumberOfAddress"
+    - "Complain"
+    - "OrderAmountHikeFromlastYear"
+    - "CouponUsed"
+    - "OrderCount"
+    - "DaySinceLastOrder"
+    - "CashbackAmount"
+
+
+  reason: "Scaling is required for linear models. Tree models don't require scaling"
+  fit_on: 'train'
+
+# @logging -TimedRotatingFileHandler
+logging:
+  level: "INFO"
+  save_transformations: True
+  log_file: 'data_preprocessing.log'
+
+  track_statistics:
+    - "shape"
+    - "missing_values"
+    - 'memory_usage'
+    - "numeric_distributions"
+
+# @notes and assumptions
+notes:
+  - Missing values are MAR (Missing At Random)
+  - There are no extreme outliers in the dataset overall
+  - There were no duplicates in the dataset
+  - Categorical columns were relatively clean as compared to numeric columns
+  - All categorical columns have unique values less than 10
+  - There are no datetime columns
+
+assumptions:
+  - "There are no significant timelines in the dataset"
+  - "The dataset doesn't contain alot of information about user demographics"
+  - "The dataset doesn't capture how pricing affects customer churn"
+
+future_improvements:
+  - "Add economic factors that affects churn"
+  - "Add information about user demographics and culture"
