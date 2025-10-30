@@ -302,7 +302,6 @@ def project_metadata(output_file : str | Path) -> Dict[str,Any]:
     ''' Get and save project metadata
 
     Args:
-        metadata : Project metadata 
         filename : Ouptut file path
 
     Returns:

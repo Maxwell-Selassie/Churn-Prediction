@@ -6,7 +6,7 @@ from typing import Optional, List, Dict, Any
 import warnings
 warnings.filterwarnings('ignore')
 from utils import (
-    setup_logger, get_timestamp, ensure_directories, read_yaml_file
+    setup_logger, get_timestamp, ensure_directories, read_yaml_file, save_json_file
 )
 from sklearn.preprocessing import StandardScaler
 
@@ -249,3 +249,47 @@ class DataPreprocesserPipeline():
             'columns_scaled' : cols_to_scale
         })
         return df
+    
+    def fit_transform(self, df: pd.DataFrame, target_col: Optional[str] = None) -> pd.DataFrame:
+        '''fit preprocessor on training data and transform
+        
+        Args:
+            df: Training DataFrame
+            target_col: Name of target column
+            
+        Returns:
+            transformed dataframe
+            
+        '''
+        log.info('='*50)
+        log.info('STARTING FIT_TRANSFORM..(training data only)')
+        log.info('='*50)
+
+        target = df[target_col] if target_col and target_col in df.columns else None
+        
+        # apply transformations
+        df = self.validate_data(df)
+        df = self.drop_columns(df)
+        df = self.handling_missing_values(df)
+        df = self.handle_outliers(df)
+        df = self.encoding_features(df)
+        df = self.scaling_features(df)
+
+        # save transformers
+        self.save_transformers()
+
+        self.metadata ={
+            'timestamp_end' : get_timestamp(),
+            'final_shape' : df.shape,
+            'transformations' : self.log_transformations
+        }
+        save_json_file(self.metadata, self.config['file_paths']['preprocessing_metadata'])
+
+        log.info('='*50)
+        log.info('✓ FIT_TRANSFORM COMPLETED')
+        log.info(f"Final shape: {df.shape}")
+        log.info('='*50)
+        
+        return df
+    
+    def transform(self, df: pd.DataFrame)

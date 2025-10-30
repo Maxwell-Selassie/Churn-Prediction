@@ -25,6 +25,7 @@ file_paths:
   preprocessed_data: 'data/processed/cleaned_e-commerce.csv'
   scalar_path: 'models/scalar.pkl'
   encoder_path: 'models/encoder.pkl'
+  preprocessing_metadata: 'data/preprocessing_metadata.json'
 
 # Columns to drop
 columns_to_drop:
@@ -32,9 +33,6 @@ columns_to_drop:
     reason: 'An identifier. Not predictive'
     eda_evidence: 'CustomerID.png showed a non-predictive pattern'
 
-  - name: 'Churn'
-    reason: 'Target Ouput. Does not undergo preprocessing'
-    eda_evidence: 'none'
 
 # handle missing values
 missing_values:
