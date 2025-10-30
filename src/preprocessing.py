@@ -8,6 +8,7 @@ warnings.filterwarnings('ignore')
 from utils import (
     setup_logger, get_timestamp, ensure_directories, read_yaml_file
 )
+from sklearn.preprocessing import StandardScaler
 
 log = setup_logger(name='preprocessing', log_filename='logs/data_preprocessing.log',level=logging.INFO)
 
@@ -199,4 +200,52 @@ class DataPreprocesserPipeline():
             dummies = pd.get_dummies(df[col], prefix=col, drop_first=drop_first)
             df = pd.concat([df, dummies], axis=1)
             df = df.drop(columns=col)
+
+            log.info(f'Created {len(dummies.columns)} dummy columns')
+
+        self.log_transformations('encoding', {
+            'one_hot columns' : len(self.config.get('one_hot',[]))
+        })
+
+    def scaling_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        '''Scale numeric features'''
+        log.info('='*50)
+        log.info("SCALING NUMERIC FEATURES")
+        log.info("="*50)
+
+        if 'scaling' not in self.config:
+            log.warning(f'No columns available for scaling. Skipping...')
+            return df
         
+        method = self.config['scaling'].get('method','standard')
+        columns_to_scale = self.config['scaling'].get('columns_to_scale',[])
+        exclude = self.config['scaling'].get('exlcude',[])
+
+
+        cols_to_scale = [col for col in columns_to_scale if col in df.columns and col not in exclude]
+        
+        if not cols_to_scale:
+            log.info(f'No columns to scale...')
+            return df
+        
+        if self.scalar is None:
+            # fit scaler
+            if method == 'standard':
+                self.scalar = StandardScaler()
+            else:
+                log.info('No Method for scaling specified..Defaulting to "StandardScaler".')
+                self.scalar = StandardScaler()
+
+            df[cols_to_scale] = self.scalar.fit_transform(df[cols_to_scale])
+            log.info('Scaler fitted and applied')
+
+        else:
+            # transform 
+            df[cols_to_scale] = self.scalar.transform(df[cols_to_scale])
+            log.info('Scaler applied using existing "fit"')
+
+        self.log_transformations('scaling', {
+            'scaling_method' : method,
+            'columns_scaled' : cols_to_scale
+        })
+        return df
