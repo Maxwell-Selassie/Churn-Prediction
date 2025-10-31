@@ -34,13 +34,12 @@ columns_to_drop:
 
 # handle missing values
 missing_values:
-
   numeric:
     DaySinceLastOrder:
       method: 'median'
       reason: 'Distribution is right-skewed - sensitive to outliers, hence, median imputation'
       eda_evidence: 'DaySinceLastOrder.png showed distribution is right-skewed. 
-                    Hence, we imputation is the median of the distribution'
+                      Hence, we imputation is the median of the distribution'
 
     OrderAmountHikeFromlastYear:
       method: 'median'
@@ -58,12 +57,12 @@ missing_values:
       eda_evidence: 'OrderCount.png showed distribution is heavily skewed to the right'
 
     CouponUsed:
-    method: 'median'
-    reason: 'Distribution is rightly skewed with outliers, hence median imputation'
-    eda_evidence: 'CouponUsed.png showed distribution is skewed to the right'
+      method: 'median'
+      reason: 'Distribution is rightly skewed with outliers, hence median imputation'
+      eda_evidence: 'CouponUsed.png showed distribution is skewed to the right'
 
     HourSpendOnApp:
-      method: 'mode'
+      method: 'median'
       reason: 'Most of the values are 3.0, "Mean" and "Median" are approximately 3.0'
       eda_evidence: 'HourSpendOnApp.png showed distribution is mostly centered at 3.0'
 
@@ -139,7 +138,7 @@ iqr_multiplier: 1.5
 encoding:
   one_hot:
 
-    PreferredDeviceLogin:
+    PreferredLoginDevice:
       drop_first: True
       max_categories: 10
       reason: 'Only 3 unique values. Best option is to one-hot encode'

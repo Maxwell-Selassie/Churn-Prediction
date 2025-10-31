@@ -100,7 +100,7 @@ class DataPreprocessorPipeline:
             log.info("No missing_values configuration provided. Skipping missing handling.")
             return df
 
-        for col, strategy in missing_cfg.items():
+        for col, strategy in missing_cfg['numeric'].items():
             if col not in df.columns:
                 log.warning(f"Configured missing-col '{col}' not in dataframe. Skipping.")
                 continue
@@ -138,6 +138,7 @@ class DataPreprocessorPipeline:
         })
 
         return df
+    
 
     def handle_outliers(self, df: pd.DataFrame) -> pd.DataFrame:
         log.info("=" * 50)
@@ -208,7 +209,7 @@ class DataPreprocessorPipeline:
                 log.info(f"One-hot encoding '{col}' (drop_first={drop_first})")
                 
                 # Perform one-hot encoding
-                dummies = pd.get_dummies(df[col], prefix=col, drop_first=drop_first)
+                dummies = pd.get_dummies(df[col], prefix=col, drop_first=drop_first).astype(int)
                 df = pd.concat([df, dummies], axis=1)
                 df = df.drop(columns=[col])
                 
