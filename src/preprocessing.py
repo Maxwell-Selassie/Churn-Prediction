@@ -185,7 +185,7 @@ class DataPreprocessorPipeline:
         log.info("Outlier handling complete.")
         return df
 
-    def _encode_features(self, df: pd.DataFrame, target: Optional[pd.Series] = None) -> pd.DataFrame:
+    def _encode_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Encode categorical features"""
         log.info('-'*70)
         log.info('STEP 6: FEATURE ENCODING')
@@ -266,7 +266,7 @@ class DataPreprocessorPipeline:
         df = self.drop_columns(df)
         df = self.handling_missing_values(df)
         df = self.handle_outliers(df)
-        df = self.encoding_features(df)
+        df =  (df)
         df = self.scaling_features(df)
 
         # save transformers (if any)
