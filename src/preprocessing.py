@@ -214,12 +214,6 @@ class DataPreprocessorPipeline:
                 
                 log.info(f"Created {len(dummies.columns)} dummy columns")
         
-        
-        self.transform_log('encoding', {
-            'onehot_columns': len(self.config['encoding'].get('one_hot', [])),
-            'target_encoded': len(self.target_encoders)
-        })
-        
         return df
 
     def scaling_features(self, df: pd.DataFrame) -> pd.DataFrame:
