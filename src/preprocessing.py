@@ -200,7 +200,7 @@ class DataPreprocessorPipeline:
             onehot_config = self.config['encoding'].get('one_hot', self.config['encoding'].get('onehot', []))
             
             for item in onehot_config:
-                col = item['column']
+                col = itemode
                 if col not in df.columns:
                     log.warning(f"Column '{col}' not found, skipping")
                     continue
@@ -266,7 +266,7 @@ class DataPreprocessorPipeline:
         df = self.drop_columns(df)
         df = self.handling_missing_values(df)
         df = self.handle_outliers(df)
-        df =  (df)
+        df =  self._encode_features(df)
         df = self.scaling_features(df)
 
         # save transformers (if any)
@@ -298,7 +298,7 @@ class DataPreprocessorPipeline:
         df = self.drop_columns(df)
         df = self.handling_missing_values(df)
         df = self.handle_outliers(df)
-        df = self.encoding_features(df)
+        df = self._encode_features(df)
         df = self.scaling_features(df)
 
         log.info("TRANSFORM completed.")
