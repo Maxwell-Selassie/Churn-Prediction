@@ -199,13 +199,12 @@ class DataPreprocessorPipeline:
         if 'one_hot' in self.config['encoding'] or 'onehot' in self.config['encoding']:
             onehot_config = self.config['encoding'].get('one_hot', self.config['encoding'].get('onehot', []))
             
-            for item in onehot_config:
-                col = itemode
+            for col,strategy in onehot_config.items():
                 if col not in df.columns:
                     log.warning(f"Column '{col}' not found, skipping")
                     continue
                 
-                drop_first = item.get('drop_first', True)
+                drop_first = strategy.get('drop_first', True)
                 log.info(f"One-hot encoding '{col}' (drop_first={drop_first})")
                 
                 # Perform one-hot encoding
