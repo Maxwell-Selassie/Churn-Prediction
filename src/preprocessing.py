@@ -215,7 +215,7 @@ class DataPreprocessorPipeline:
                 log.info(f"Created {len(dummies.columns)} dummy columns")
         
         
-        self._log_transformation('encoding', {
+        self.transform_log('encoding', {
             'onehot_columns': len(self.config['encoding'].get('one_hot', [])),
             'target_encoded': len(self.target_encoders)
         })
