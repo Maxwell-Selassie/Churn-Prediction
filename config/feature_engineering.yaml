@@ -1,0 +1,564 @@
+# =============================================================================
+# FEATURE ENGINEERING CONFIGURATION - CUSTOMER CHURN PREDICTION
+# =============================================================================
+# E-commerce customer churn prediction feature engineering
+# Focus: Identify at-risk customers before they leave
+# 
+# Author: Maxwell Selassie Hiamatsu
+# Date: October 24, 2025
+# Dataset: Customer Churn Dataset
+# Target: Churn (0=Retained, 1=Churned)
+# Version: 1.0
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PROJECT METADATA
+# -----------------------------------------------------------------------------
+project:
+  name: "E-commerce Customer Churn Prediction"
+  version: "1.0.0"
+  description: "Feature engineering pipeline for identifying customers at risk of churning"
+  business_goal: "Reduce churn rate by identifying at-risk customers for targeted retention campaigns"
+
+# -----------------------------------------------------------------------------
+# FILE PATHS
+# -----------------------------------------------------------------------------
+paths:
+  preprocessed_data: "data/processed/churn_cleaned.csv"
+  engineered_data: "data/processed/churn_engineered.csv"
+  feature_engineering_metadata: "logs/feature_engineering_metadata.json"
+
+# -----------------------------------------------------------------------------
+# ARITHMETIC FEATURES
+# -----------------------------------------------------------------------------
+# Create features using basic mathematical operations
+arithmetic:
+  enabled: true
+  features:
+    # ===== ENGAGEMENT INTENSITY METRICS =====
+    - name: "app_usage_per_order"
+      operation: "ratio"
+      operands: ["HourSpendOnApp", "OrderCount"]
+      reason: "Efficiency metric - high value means browsing without buying (churn signal)"
+      churn_hypothesis: "Customers who browse a lot but order little are likely window shopping competitors"
+    
+    - name: "orders_per_tenure_month"
+      operation: "ratio"
+      operands: ["OrderCount", "Tenure"]
+      reason: "Purchase frequency normalized by customer lifetime"
+      churn_hypothesis: "Low frequency buyers are easier to lose"
+    
+    - name: "app_usage_per_day_active"
+      operation: "ratio"
+      operands: ["HourSpendOnApp", "DaySinceLastOrder"]
+      reason: "Recent engagement level - still browsing but not ordering?"
+      churn_hypothesis: "High browsing + no orders = searching for alternatives"
+    
+    # ===== VALUE METRICS =====
+    - name: "cashback_per_order"
+      operation: "ratio"
+      operands: ["CashbackAmount", "OrderCount"]
+      reason: "Average value captured per transaction"
+      churn_hypothesis: "High cashback dependency = price-sensitive = churn risk"
+    
+    - name: "coupon_usage_rate"
+      operation: "ratio"
+      operands: ["CouponUsed", "OrderCount"]
+      reason: "Dependency on discounts"
+      churn_hypothesis: "Heavy coupon users will chase competitor deals"
+    
+    - name: "order_growth_velocity"
+      operation: "ratio"
+      operands: ["OrderAmountHikeFromlastYear", "Tenure"]
+      reason: "How fast is spending growing relative to tenure"
+      churn_hypothesis: "Declining growth = losing interest"
+    
+    # ===== COMPLAINT METRICS =====
+    - name: "complaint_per_order"
+      operation: "ratio"
+      operands: ["Complain", "OrderCount"]
+      reason: "Complaint rate - how often do they have issues?"
+      churn_hypothesis: "Frequent complaints without resolution = churn"
+    
+    - name: "orders_per_complaint"
+      operation: "ratio"
+      operands: ["OrderCount", "Complain"]
+      reason: "Resilience metric - continued ordering despite complaints"
+      churn_hypothesis: "Low value = complaint stopped them from ordering"
+    
+    # ===== LIFECYCLE METRICS =====
+    - name: "order_momentum"
+      operation: "ratio"
+      operands: ["OrderCount", "DaySinceLastOrder"]
+      reason: "Recent activity intensity"
+      churn_hypothesis: "Low momentum = dormant customer"
+    
+    - name: "tenure_to_days_inactive_ratio"
+      operation: "ratio"
+      operands: ["Tenure", "DaySinceLastOrder"]
+      reason: "Lifetime compared to inactivity period"
+      churn_hypothesis: "High ratio = inactive relative to tenure"
+    
+    # ===== DEVICE ENGAGEMENT =====
+    - name: "devices_per_order"
+      operation: "ratio"
+      operands: ["NumberOfDeviceRegistered", "OrderCount"]
+      reason: "Multi-device usage relative to orders"
+      churn_hypothesis: "Multi-device users are more engaged"
+    
+    - name: "device_adoption_rate"
+      operation: "ratio"
+      operands: ["NumberOfDeviceRegistered", "Tenure"]
+      reason: "How quickly they adopted multiple devices"
+      churn_hypothesis: "Fast adopters = tech-savvy = higher retention"
+    
+    # ===== LOG TRANSFORMS (for skewed features) =====
+    - name: "log_order_count"
+      operation: "log"
+      operands: ["OrderCount"]
+      reason: "Handle right skewness in order count"
+    
+    - name: "log_coupon_used"
+      operation: "log"
+      operands: ["CouponUsed"]
+      reason: "Handle right skewness in coupon usage"
+    
+    - name: "log_tenure"
+      operation: "log"
+      operands: ["Tenure"]
+      reason: "Handle right skewness in tenure"
+    
+    - name: "log_days_since_last_order"
+      operation: "log"
+      operands: ["DaySinceLastOrder"]
+      reason: "Handle right skewness - log(0) issues handled by log1p"
+    
+    - name: "log_warehouse_to_home"
+      operation: "log"
+      operands: ["WarehouseToHome"]
+      reason: "Handle right skewness in distance"
+    
+    # ===== SATISFACTION METRICS =====
+    - name: "satisfaction_per_tenure"
+      operation: "ratio"
+      operands: ["SatisfactionScore", "Tenure"]
+      reason: "Satisfaction trend over customer lifetime"
+      churn_hypothesis: "Low value = satisfaction declining over time"
+    
+    - name: "satisfaction_per_order"
+      operation: "ratio"
+      operands: ["SatisfactionScore", "OrderCount"]
+      reason: "Satisfaction relative to order frequency"
+
+# -----------------------------------------------------------------------------
+# AGGREGATE FEATURES
+# -----------------------------------------------------------------------------
+# Group-level statistics to capture segment behavior
+aggregates:
+  enabled: true
+  features:
+    # ===== COMPLAINT ANALYSIS =====
+    - group_by: "Complain"
+      agg_column: "Tenure"
+      agg_function: "mean"
+      feature_name: "avg_tenure_by_complain_status"
+      reason: "Do complaints correlate with tenure? New customers complain more?"
+    
+    - group_by: "Complain"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_complain_status"
+      reason: "Do customers who complain order less frequently?"
+    
+    - group_by: "Complain"
+      agg_column: "SatisfactionScore"
+      agg_function: "mean"
+      feature_name: "avg_satisfaction_by_complain_status"
+      reason: "Satisfaction level of complainers vs non-complainers"
+    
+    # ===== GENDER ANALYSIS =====
+    - group_by: "Gender"
+      agg_column: "HourSpendOnApp"
+      agg_function: "mean"
+      feature_name: "avg_app_hours_by_gender"
+      reason: "Which gender spends more time on app?"
+    
+    - group_by: "Gender"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_gender"
+      reason: "Which gender orders more frequently?"
+    
+    - group_by: "Gender"
+      agg_column: "CashbackAmount"
+      agg_function: "mean"
+      feature_name: "avg_cashback_by_gender"
+      reason: "Which gender generates more value?"
+    
+    # ===== MARITAL STATUS ANALYSIS =====
+    - group_by: "MaritalStatus"
+      agg_column: "HourSpendOnApp"
+      agg_function: "mean"
+      feature_name: "avg_app_hours_by_marital_status"
+      reason: "Do single/married/divorced customers have different engagement?"
+    
+    - group_by: "MaritalStatus"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_marital_status"
+      reason: "Purchase frequency by marital status"
+    
+    - group_by: "MaritalStatus"
+      agg_column: "SatisfactionScore"
+      agg_function: "mean"
+      feature_name: "avg_satisfaction_by_marital_status"
+      reason: "Satisfaction patterns by life stage"
+    
+    # ===== CITY TIER ANALYSIS =====
+    - group_by: "CityTier"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_city_tier"
+      reason: "Do tier-1 cities order more than tier-2/3?"
+    
+    - group_by: "CityTier"
+      agg_column: "WarehouseToHome"
+      agg_function: "mean"
+      feature_name: "avg_distance_by_city_tier"
+      reason: "Delivery distance patterns by city tier"
+    
+    - group_by: "CityTier"
+      agg_column: "SatisfactionScore"
+      agg_function: "mean"
+      feature_name: "avg_satisfaction_by_city_tier"
+      reason: "Service quality perception by city tier"
+    
+    # ===== SATISFACTION ANALYSIS =====
+    - group_by: "SatisfactionScore"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_satisfaction"
+      reason: "Do satisfied customers order more?"
+    
+    - group_by: "SatisfactionScore"
+      agg_column: "Tenure"
+      agg_function: "mean"
+      feature_name: "avg_tenure_by_satisfaction"
+      reason: "Relationship between satisfaction and loyalty"
+    
+    - group_by: "SatisfactionScore"
+      agg_column: "DaySinceLastOrder"
+      agg_function: "mean"
+      feature_name: "avg_days_inactive_by_satisfaction"
+      reason: "Do unsatisfied customers become inactive faster?"
+    
+    # ===== PAYMENT MODE ANALYSIS =====
+    - group_by: "PreferredPaymentMode"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_payment_mode"
+      reason: "Order frequency by payment preference"
+    
+    - group_by: "PreferredPaymentMode"
+      agg_column: "CashbackAmount"
+      agg_function: "mean"
+      feature_name: "avg_cashback_by_payment_mode"
+      reason: "Value by payment method"
+    
+    # ===== DEVICE ANALYSIS =====
+    - group_by: "PreferredLoginDevice"
+      agg_column: "HourSpendOnApp"
+      agg_function: "mean"
+      feature_name: "avg_app_hours_by_device"
+      reason: "Mobile vs computer user engagement"
+    
+    - group_by: "PreferredLoginDevice"
+      agg_column: "OrderCount"
+      agg_function: "mean"
+      feature_name: "avg_orders_by_device"
+      reason: "Purchase patterns by device type"
+
+# -----------------------------------------------------------------------------
+# INTERACTION FEATURES
+# -----------------------------------------------------------------------------
+# Capture joint effects between variables
+interactions:
+  enabled: true
+  features:
+    # ===== ENGAGEMENT INTERACTIONS =====
+    - name: "tenure_X_satisfaction"
+      columns: ["Tenure", "SatisfactionScore"]
+      reason: "Long tenure + high satisfaction = loyal customer"
+    
+    - name: "ordercount_X_cashback"
+      columns: ["OrderCount", "CashbackAmount"]
+      reason: "Customer lifetime value proxy"
+    
+    - name: "hourspend_X_satisfaction"
+      columns: ["HourSpendOnApp", "SatisfactionScore"]
+      reason: "Engaged AND satisfied = best customers"
+    
+    # ===== COUPON INTERACTIONS =====
+    - name: "coupon_X_orderamounthike"
+      columns: ["CouponUsed", "OrderAmountHikeFromlastYear"]
+      reason: "Do coupons drive spending growth?"
+    
+    - name: "coupon_X_ordercount"
+      columns: ["CouponUsed", "OrderCount"]
+      reason: "Strong correlation (0.73) - capture it as feature"
+    
+    # ===== COMPLAINT INTERACTIONS =====
+    - name: "complain_X_satisfaction"
+      columns: ["Complain", "SatisfactionScore"]
+      reason: "Complaints + low satisfaction = highest churn risk"
+    
+    - name: "complain_X_dayssince"
+      columns: ["Complain", "DaySinceLastOrder"]
+      reason: "Did complaint cause them to stop ordering?"
+    
+    - name: "complain_X_ordercount"
+      columns: ["Complain", "OrderCount"]
+      reason: "Complaint frequency vs purchase frequency"
+    
+    # ===== LOCATION INTERACTIONS =====
+    - name: "citytier_X_warehousetohome"
+      columns: ["CityTier", "WarehouseToHome"]
+      reason: "Delivery experience varies by city tier and distance"
+    
+    - name: "warehousetohome_X_satisfaction"
+      columns: ["WarehouseToHome", "SatisfactionScore"]
+      reason: "Delivery distance impact on satisfaction"
+    
+    - name: "warehousetohome_X_ordercount"
+      columns: ["WarehouseToHome", "OrderCount"]
+      reason: "Does distance deter frequent ordering?"
+    
+    # ===== LIFECYCLE INTERACTIONS =====
+    - name: "tenure_X_ordercount"
+      columns: ["Tenure", "OrderCount"]
+      reason: "Customer value = loyalty × activity"
+    
+    - name: "tenure_X_cashback"
+      columns: ["Tenure", "CashbackAmount"]
+      reason: "Correlation (0.45) - long-term customer value"
+    
+    # ===== DEVICE INTERACTIONS =====
+    - name: "hourspend_X_devices"
+      columns: ["HourSpendOnApp", "NumberOfDeviceRegistered"]
+      reason: "Correlation (0.36) - multi-device engagement"
+    
+    - name: "devices_X_ordercount"
+      columns: ["NumberOfDeviceRegistered", "OrderCount"]
+      reason: "Multi-device users should order more"
+
+# -----------------------------------------------------------------------------
+# DOMAIN-SPECIFIC FEATURES (E-commerce Churn Patterns)
+# -----------------------------------------------------------------------------
+domain_features:
+  enabled: true
+  features:
+    - "customer_lifecycle_stage"     # New, Growing, Mature, At-Risk, Dormant
+    - "value_tier"                    # Low, Medium, High value customer
+    - "engagement_score"              # Composite engagement metric
+    - "churn_risk_score"              # Composite risk metric
+    - "loyalty_score"                 # Composite loyalty metric
+    - "price_sensitivity_flag"        # Heavy coupon user?
+    - "multi_device_user_flag"        # Uses multiple devices?
+    - "complaint_unresolved_flag"     # Complained + still unsatisfied?
+    - "dormant_customer_flag"         # Not ordered in 30+ days?
+    - "at_risk_flag"                  # Multiple churn signals?
+
+# Custom domain feature definitions
+domain_feature_logic:
+  # Customer lifecycle stages
+  customer_lifecycle_stage:
+    rules:
+      - condition: "Tenure < 3"
+        value: "New"
+      - condition: "Tenure >= 3 and Tenure < 12 and OrderCount < 10"
+        value: "Growing"
+      - condition: "Tenure >= 12 and OrderCount >= 10 and DaySinceLastOrder < 30"
+        value: "Mature"
+      - condition: "DaySinceLastOrder >= 30 and DaySinceLastOrder < 60"
+        value: "At-Risk"
+      - condition: "DaySinceLastOrder >= 60"
+        value: "Dormant"
+  
+  # Value segmentation
+  value_tier:
+    rules:
+      - condition: "OrderCount >= 20 and CashbackAmount >= 200"
+        value: "High"
+      - condition: "OrderCount >= 10 and CashbackAmount >= 100"
+        value: "Medium"
+      - condition: "OrderCount < 10"
+        value: "Low"
+  
+  # Engagement score (0-100)
+  engagement_score:
+    formula: "(OrderCount * 2) + (HourSpendOnApp * 1.5) + (SatisfactionScore * 10) + (NumberOfDeviceRegistered * 5)"
+    normalize: true
+  
+  # Churn risk score (0-100)
+  churn_risk_score:
+    formula: "(DaySinceLastOrder * 2) + (Complain * 15) + ((5 - SatisfactionScore) * 10) + (WarehouseToHome * 0.5)"
+    normalize: true
+  
+  # Loyalty score (0-100)
+  loyalty_score:
+    formula: "(Tenure * 2) + (OrderCount * 3) + (SatisfactionScore * 10) - (Complain * 5)"
+    normalize: true
+  
+  # Binary flags
+  price_sensitivity_flag:
+    condition: "(CouponUsed / OrderCount) > 0.7"
+  
+  multi_device_user_flag:
+    condition: "NumberOfDeviceRegistered > 1"
+  
+  complaint_unresolved_flag:
+    condition: "Complain > 0 and SatisfactionScore < 3"
+  
+  dormant_customer_flag:
+    condition: "DaySinceLastOrder > 30"
+  
+  at_risk_flag:
+    condition: "DaySinceLastOrder > 30 and SatisfactionScore < 3 and Complain > 0"
+
+# -----------------------------------------------------------------------------
+# BINNING FEATURES
+# -----------------------------------------------------------------------------
+# Discretize continuous variables for interpretability
+binning:
+  enabled: true
+  features:
+    # Tenure segmentation
+    - column: "Tenure"
+      name: "tenure_segment"
+      bins: [0, 3, 12, 24, 100]
+      labels: ["New", "Growing", "Mature", "Veteran"]
+      reason: "Customer lifecycle stages"
+    
+    # Order frequency tiers
+    - column: "OrderCount"
+      name: "order_frequency_tier"
+      bins: [0, 5, 15, 30, 1000]
+      labels: ["Rare", "Occasional", "Frequent", "Power"]
+      reason: "Purchase behavior segmentation"
+    
+    # Satisfaction levels
+    - column: "SatisfactionScore"
+      name: "satisfaction_tier"
+      bins: [0, 2, 3, 4, 6]
+      labels: ["Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied"]
+      reason: "Satisfaction segmentation"
+    
+    # App usage levels
+    - column: "HourSpendOnApp"
+      name: "app_usage_tier"
+      bins: [0, 1, 3, 5, 100]
+      labels: ["Low", "Medium", "High", "Very High"]
+      reason: "Engagement segmentation"
+    
+    # Distance categories
+    - column: "WarehouseToHome"
+      name: "distance_tier"
+      bins: [0, 10, 20, 30, 1000]
+      labels: ["Near", "Medium", "Far", "Very Far"]
+      reason: "Delivery distance impact"
+    
+    # Inactivity levels
+    - column: "DaySinceLastOrder"
+      name: "inactivity_tier"
+      bins: [0, 7, 14, 30, 60, 1000]
+      labels: ["Active", "Recently Active", "Inactive", "At Risk", "Dormant"]
+      reason: "Customer activity status"
+    
+    # Cashback value tiers
+    - column: "CashbackAmount"
+      name: "cashback_tier"
+      bins: [0, 100, 200, 300, 10000]
+      labels: ["Low Value", "Medium Value", "High Value", "Premium"]
+      reason: "Customer value segmentation"
+
+# -----------------------------------------------------------------------------
+# POLYNOMIAL FEATURES
+# -----------------------------------------------------------------------------
+# Capture non-linear relationships
+polynomial:
+  enabled: true
+  features:
+    - column: "Tenure"
+      degrees: [2]
+      reason: "Capture non-linear loyalty effects"
+    
+    - column: "OrderCount"
+      degrees: [2]
+      reason: "Diminishing returns on order frequency"
+    
+    - column: "SatisfactionScore"
+      degrees: [2]
+      reason: "Non-linear impact on retention"
+    
+    - column: "DaySinceLastOrder"
+      degrees: [2]
+      reason: "Exponential churn risk with inactivity"
+
+# -----------------------------------------------------------------------------
+# STATISTICAL FEATURES
+# -----------------------------------------------------------------------------
+statistical:
+  enabled: true
+  features:
+    - "percentile_ranks"
+    - "z_scores"
+  
+  percentile_columns:
+    - "Tenure"
+    - "OrderCount"
+    - "CashbackAmount"
+    - "HourSpendOnApp"
+    - "DaySinceLastOrder"
+  
+  zscore_columns:
+    - "Tenure"
+    - "OrderCount"
+    - "SatisfactionScore"
+    - "DaySinceLastOrder"
+
+# -----------------------------------------------------------------------------
+# POST-PROCESSING
+# -----------------------------------------------------------------------------
+handle_nan_after_engineering: true
+
+# -----------------------------------------------------------------------------
+# FEATURE IMPORTANCE NOTES
+# -----------------------------------------------------------------------------
+notes:
+  expected_top_predictors:
+    - "DaySinceLastOrder (recency is king in churn)"
+    - "SatisfactionScore (dissatisfied customers leave)"
+    - "Complain + low satisfaction combo"
+    - "Tenure (new customers churn more)"
+    - "order_momentum (declining activity)"
+    - "CouponUsed correlation with OrderCount"
+  
+  churn_warning_signals:
+    - "DaySinceLastOrder > 30 days"
+    - "SatisfactionScore < 3"
+    - "Complain > 0 with no subsequent orders"
+    - "Declining OrderAmountHikeFromlastYear"
+    - "High app usage but low orders (window shopping)"
+  
+  retention_strategies_by_segment:
+    - "At-Risk (30-60 days inactive): Re-engagement campaign with discount"
+    - "Complaint + Unsatisfied: Personal outreach, service recovery"
+    - "Price Sensitive: Loyalty program, exclusive deals"
+    - "Dormant (60+ days): Win-back campaign with deep discount"
+  
+  feature_engineering_principles:
+    - "Recency, Frequency, Monetary (RFM) features are gold standard"
+    - "Ratio features often outperform raw counts"
+    - "Interaction between complaints and satisfaction is critical"
+    - "Engagement metrics (app usage, devices) signal commitment"
+    - "Distance + satisfaction interaction captures delivery experience"

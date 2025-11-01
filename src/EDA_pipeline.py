@@ -348,7 +348,7 @@ class EDAResults:
 
 
 
-def run_eda(filepath: str = 'data/raw/e-commerce.csv') -> EDAResults:
+def run_eda(filepath: str = 'data/raw/e-commerce_data.csv') -> EDAResults:
     '''Run EDA'''
     log.info("="*50)
     log.info("🎇STARTING EXPLORATORY ANALYSIS")
