@@ -343,6 +343,7 @@ def main():
     y_train.to_csv("data/splits/y_train.csv", index=False)
     y_test.to_csv("data/splits/y_test.csv", index=False)
 
+
     preprocessor = DataPreprocessorPipeline("config/preprocessing_config.yaml")
     X_processed = preprocessor.fit_transform(x_train)
 
