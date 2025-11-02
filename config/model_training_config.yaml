@@ -1,0 +1,430 @@
+# =============================================================================
+# MODEL TRAINING CONFIGURATION
+# =============================================================================
+# Production-grade model training pipeline with MLflow tracking
+# 
+# Author: Maxwell Selassie Hiamatsu
+# Date: October 24, 2025
+# Project: Customer Churn Prediction
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PROJECT METADATA
+# -----------------------------------------------------------------------------
+project:
+  name: "Customer Churn Prediction"
+  version: "1.0.0"
+  description: "MLOps pipeline for churn prediction with automated feature selection"
+  experiment_name: "churn_prediction_experiment"
+
+# -----------------------------------------------------------------------------
+# FILE PATHS
+# -----------------------------------------------------------------------------
+paths:
+  # Data paths
+  engineered_data: "data/processed/churn_engineered.csv"
+  y_train_data: "data/processed/y_train.csv"
+  x_train_data: 'data/processed/x_train.csv'
+  x_test_data: "data/processed/x_test.csv"
+  y_test_data: "data/processed/y_test.csv"
+  
+  # Model artifacts
+  models_dir: "models"
+  best_model_path: "models/best_model.pkl"
+  feature_selector_path: "models/feature_selector.pkl"
+  
+  # Logs and results
+  logs_dir: "logs"
+  results_dir: "results"
+  mlflow_tracking_uri: "mlruns"
+  
+  # Metadata
+  feature_importance_path: "results/feature_importance.csv"
+  model_comparison_path: "results/model_comparison.csv"
+  selected_features_path: "results/selected_features.json"
+
+# -----------------------------------------------------------------------------
+# DATA SPLITTING
+# -----------------------------------------------------------------------------
+data_split:
+  validation_size: 0.2  # From training set
+  random_state: 42
+  stratify: true
+
+# -----------------------------------------------------------------------------
+# FEATURE SELECTION
+# -----------------------------------------------------------------------------
+feature_selection:
+  enabled: true
+  
+  # Initial feature filtering (before training)
+  initial_filter:
+    enabled: true
+    method: "variance_threshold"
+    variance_threshold: 0.01  # Remove quasi-constant features
+  
+  # Correlation-based removal
+  correlation_filter:
+    enabled: true
+    threshold: 0.95  # Remove features with correlation > 0.95
+  
+  # Iterative feature selection (after initial training)
+  iterative_selection:
+    enabled: true
+    methods:
+      - "tree_importance"      # Random Forest feature importance
+      - "permutation"          # Permutation importance
+      - "shap"                 # SHAP values
+    
+    # Selection strategy
+    selection_strategy: "average_rank"  # average_rank, intersection, union
+    top_k_features: 50  # Keep top 50 features
+    importance_threshold: 0.001  # Minimum importance to keep
+  
+  # Feature stability (across CV folds)
+  stability_check:
+    enabled: true
+    min_stability_score: 0.7  # Feature must be important in 70% of folds
+
+# -----------------------------------------------------------------------------
+# MODEL TRAINING
+# -----------------------------------------------------------------------------
+training:
+  # Cross-validation
+  cv_strategy: "stratified_kfold"
+  n_splits: 5
+  shuffle: true
+  random_state: 42
+  
+  # Class imbalance handling
+  class_weight: "balanced"  # or "none" or custom dict
+  
+  # Training phases
+  phases:
+    phase_1:
+      name: "Initial Training (All Features)"
+      description: "Train with all engineered features to establish baseline"
+      enabled: true
+      quick_train: false  # Set to true for faster grid search
+    
+    phase_2:
+      name: "Feature Selection"
+      description: "Analyze feature importance and select top features"
+      enabled: true
+    
+    phase_3:
+      name: "Retrain with Selected Features"
+      description: "Train models with selected features only"
+      enabled: true
+      quick_train: false
+    
+    phase_4:
+      name: "Final Hyperparameter Tuning"
+      description: "Fine-tune best model from Phase 3"
+      enabled: true
+      extended_search: true  # More hyperparameter combinations
+
+# -----------------------------------------------------------------------------
+# MODELS AND HYPERPARAMETERS
+# -----------------------------------------------------------------------------
+models:
+  # Logistic Regression
+  logistic_regression:
+    enabled: true
+    class: "sklearn.linear_model.LogisticRegression"
+    init_params:
+      random_state: 42
+      n_jobs: -1
+      class_weight: "balanced"
+      max_iter: 1000
+    
+    # Phase 1: Initial grid (wider search)
+    param_grid_phase1:
+      penalty: ["l1", "l2"]
+      C: [0.1, 0.5, 1.0, 5.0, 10.0]
+      solver: ["saga"]  # Supports both L1 and L2
+    
+    # Phase 3: Refined grid (narrower search)
+    param_grid_phase3:
+      penalty: ["l2"]
+      C: [0.5, 1.0, 2.0, 5.0]
+      solver: ["lbfgs"]
+    
+    # Phase 4: Final tuning (finest search)
+    param_grid_phase4:
+      C: [0.8, 1.0, 1.2, 1.5, 2.0]
+      max_iter: [800, 1000, 1200]
+  
+  # Random Forest
+  random_forest:
+    enabled: true
+    class: "sklearn.ensemble.RandomForestClassifier"
+    init_params:
+      random_state: 42
+      n_jobs: -1
+      class_weight: "balanced"
+    
+    param_grid_phase1:
+      n_estimators: [100, 200, 300]
+      max_depth: [5, 10, 15, 20]
+      min_samples_split: [2, 5, 10]
+      min_samples_leaf: [1, 2, 4]
+    
+    param_grid_phase3:
+      n_estimators: [150, 200, 250]
+      max_depth: [10, 15, 20]
+      min_samples_split: [2, 5]
+      min_samples_leaf: [1, 2]
+    
+    param_grid_phase4:
+      n_estimators: [180, 200, 220]
+      max_depth: [12, 15, 18]
+      min_samples_split: [3, 5]
+  
+  # XGBoost
+  xgboost:
+    enabled: true
+    class: "xgboost.XGBClassifier"
+    init_params:
+      random_state: 42
+      n_jobs: -1
+      objective: "binary:logistic"
+      eval_metric: "logloss"
+      verbosity: 0
+    
+    param_grid_phase1:
+      n_estimators: [100, 200, 300]
+      max_depth: [3, 5, 7, 9]
+      learning_rate: [0.01, 0.1, 0.3]
+      subsample: [0.7, 0.8, 1.0]
+      colsample_bytree: [0.7, 0.8, 1.0]
+      reg_lambda: [0, 1, 5]
+    
+    param_grid_phase3:
+      n_estimators: [150, 200, 250]
+      max_depth: [5, 7, 9]
+      learning_rate: [0.05, 0.1, 0.15]
+      subsample: [0.8, 0.9]
+      colsample_bytree: [0.8, 0.9]
+    
+    param_grid_phase4:
+      n_estimators: [180, 200, 220]
+      max_depth: [6, 7, 8]
+      learning_rate: [0.08, 0.1, 0.12]
+  
+  # LightGBM
+  lightgbm:
+    enabled: true
+    class: "lightgbm.LGBMClassifier"
+    init_params:
+      random_state: 42
+      n_jobs: -1
+      verbosity: -1
+      class_weight: "balanced"
+    
+    param_grid_phase1:
+      n_estimators: [100, 200, 300]
+      max_depth: [3, 5, 7, -1]
+      learning_rate: [0.01, 0.1, 0.3]
+      num_leaves: [15, 31, 63]
+      min_child_samples: [10, 20, 30]
+    
+    param_grid_phase3:
+      n_estimators: [150, 200, 250]
+      max_depth: [5, 7]
+      learning_rate: [0.05, 0.1]
+      num_leaves: [31, 63]
+    
+    param_grid_phase4:
+      n_estimators: [180, 200, 220]
+      learning_rate: [0.08, 0.1, 0.12]
+
+# -----------------------------------------------------------------------------
+# EVALUATION METRICS
+# -----------------------------------------------------------------------------
+evaluation:
+  # Primary metric for model selection
+  primary_metric: "roc_auc"  # roc_auc, f1, precision, recall
+  
+  # All metrics to track
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "roc_auc"
+    - "average_precision"
+    - "confusion_matrix"
+  
+  # Classification thresholds to evaluate
+  thresholds: [0.3, 0.4, 0.5, 0.6, 0.7]
+  
+  # Business metrics (for churn)
+  business_metrics:
+    enabled: true
+    cost_false_negative: 100  # Cost of missing a churner
+    cost_false_positive: 10   # Cost of false alarm
+    calculate_profit: true
+
+# -----------------------------------------------------------------------------
+# MLFLOW CONFIGURATION
+# -----------------------------------------------------------------------------
+mlflow:
+  enabled: true
+  tracking_uri: "mlruns"
+  experiment_name: "churn_prediction"
+  
+  # Auto-logging
+  autolog:
+    enabled: true
+    log_input_examples: true
+    log_model_signatures: true
+    log_models: true
+  
+  # Tags to track
+  tags:
+    project: "customer_churn"
+    team: "data_science"
+    model_type: "classification"
+  
+  # Artifacts to log
+  log_artifacts:
+    - "feature_importance"
+    - "confusion_matrix"
+    - "roc_curve"
+    - "precision_recall_curve"
+    - "shap_summary"
+    - "calibration_curve"
+
+# -----------------------------------------------------------------------------
+# GRID SEARCH CONFIGURATION
+# -----------------------------------------------------------------------------
+grid_search:
+  # Quick mode for testing (fewer combinations)
+  quick_mode:
+    enabled: false  # Set to true for rapid iteration
+    max_iter: 10    # Max iterations per model
+  
+  # Grid search parameters
+  cv: 5
+  scoring: "roc_auc"
+  refit: true
+  return_train_score: true
+  n_jobs: -1
+  verbose: 2
+  error_score: "raise"
+
+# -----------------------------------------------------------------------------
+# MODEL REGISTRY
+# -----------------------------------------------------------------------------
+model_registry:
+  enabled: true
+  
+  # Model promotion criteria
+  promotion_criteria:
+    min_roc_auc: 0.75
+    min_f1: 0.60
+    max_false_negative_rate: 0.25
+  
+  # Model stages
+  stages:
+    - "None"
+    - "Staging"
+    - "Production"
+    - "Archived"
+  
+  # Auto-promotion
+  auto_promote_to_staging: true
+  auto_promote_to_production: false  # Requires manual approval
+
+# -----------------------------------------------------------------------------
+# REPRODUCIBILITY
+# -----------------------------------------------------------------------------
+reproducibility:
+  random_seed: 42
+  track_environment: true
+  log_system_info: true
+  save_code_version: true
+  
+  # Requirements
+  log_requirements: true
+  requirements_file: "requirements.txt"
+
+# -----------------------------------------------------------------------------
+# PERFORMANCE OPTIMIZATION
+# -----------------------------------------------------------------------------
+performance:
+  # Parallel processing
+  n_jobs: -1  # Use all cores
+  
+  # Memory management
+  low_memory_mode: false
+  batch_size: 1000  # For large datasets
+  
+  # Early stopping (for tree models)
+  early_stopping:
+    enabled: true
+    rounds: 50
+    metric: "auc"
+
+# -----------------------------------------------------------------------------
+# EXPLAINABILITY
+# -----------------------------------------------------------------------------
+explainability:
+  enabled: true
+  
+  # SHAP analysis
+  shap:
+    enabled: true
+    sample_size: 1000  # For large datasets
+    plot_types:
+      - "summary"
+      - "bar"
+      - "waterfall"
+  
+  # Feature importance
+  feature_importance:
+    methods:
+      - "tree_importance"
+      - "permutation"
+      - "shap"
+    n_repeats: 10  # For permutation importance
+
+# -----------------------------------------------------------------------------
+# MONITORING AND ALERTS
+# -----------------------------------------------------------------------------
+monitoring:
+  enabled: true
+  
+  # Performance degradation alerts
+  alerts:
+    min_roc_auc_threshold: 0.70
+    max_training_time_hours: 6
+    email_on_completion: false
+    email_on_failure: true
+
+# -----------------------------------------------------------------------------
+# NOTES
+# -----------------------------------------------------------------------------
+notes:
+  hyperparameter_tuning_strategy:
+    - "Phase 1: Wide grid search with all features (find best model family)"
+    - "Phase 2: Feature importance analysis and selection"
+    - "Phase 3: Retrain with selected features (faster, less overfitting)"
+    - "Phase 4: Fine-grained tuning of best model"
+  
+  feature_selection_rationale:
+    - "Too many features → overfitting, slow training, hard to interpret"
+    - "Feature importance helps remove noise"
+    - "Selected features should be stable across CV folds"
+  
+  model_selection_criteria:
+    - "Primary: ROC-AUC (handles class imbalance well)"
+    - "Secondary: F1 score, business cost"
+    - "Consider interpretability for production deployment"
+  
+  production_considerations:
+    - "Model size (deployment constraints)"
+    - "Inference time (< 100ms per prediction)"
+    - "Feature availability (can we get features in production?)"
+    - "Model explainability (regulatory requirements)"
