@@ -335,28 +335,47 @@ def main():
     y = df["Churn"]
     X = df.drop(columns=["Churn"]).copy()
 
-    # train-test split
-    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    # Split data
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+
     Path("data/splits").mkdir(parents=True, exist_ok=True)
     x_train.to_csv("data/splits/x_train.csv", index=False)
     x_test.to_csv("data/splits/x_test.csv", index=False)
     y_train.to_csv("data/splits/y_train.csv", index=False)
     y_test.to_csv("data/splits/y_test.csv", index=False)
 
-
     preprocessor = DataPreprocessorPipeline("config/preprocessing_config.yaml")
-    X_processed = preprocessor.fit_transform(x_train)
 
-    preproc_out = config.get("file_paths", {}).get("preprocessed_data")
-    if preproc_out:
-        Path(preproc_out).parent.mkdir(parents=True, exist_ok=True)
-        X_processed.to_csv(preproc_out, index=False)
-        log.info(f"Saved preprocessed data to {preproc_out}")
+    # Fit on training data
+    X_train_processed = preprocessor.fit_transform(x_train)
+
+    # Ensure transformer loaded for test transform
+    preprocessor.load_transformers()
+    X_test_processed = preprocessor.transform(x_test)
+
+    # Save processed test data
+    test_preproc_out = config["file_paths"].get("test_preprocessed_data")
+    if test_preproc_out:
+        Path(test_preproc_out).parent.mkdir(parents=True, exist_ok=True)
+        X_test_processed.to_csv(test_preproc_out, index=False)
+        log.info(f"✅ Saved preprocessed TEST data to {test_preproc_out}")
     else:
-        log.warning("preprocessed_data path not configured; skipping save.")
+        log.warning("❌ 'test_preprocessed_data' path missing in config; skipping save.") 
 
-    log.info("✅ Preprocessing completed successfully!")
+    # Save processed train data
+    train_preproc_out = config["file_paths"].get("train_preprocessed_data")
+    if train_preproc_out:
+        Path(train_preproc_out).parent.mkdir(parents=True, exist_ok=True)
+        X_train_processed.to_csv(train_preproc_out, index=False)
+        log.info(f"✅ Saved preprocessed TRAIN data to {train_preproc_out}")
+    else:
+        log.warning("❌ 'train_preprocessed_data' path missing in config; skipping save.") 
+
+    log.info("🎯 Preprocessing completed successfully!")
     print("✅ Preprocessing completed successfully!")
+
 
 
 if __name__ == "__main__":

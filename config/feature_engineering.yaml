@@ -25,7 +25,8 @@ project:
 # -----------------------------------------------------------------------------
 paths:
   preprocessed_data: "data/processed/cleaned_e-commerce.csv"
-  engineered_data: "data/processed/churn_engineered.csv"
+  train_engineered_data: "data/processed/churn_engineered_train.csv"
+  test_engineered_data: 'data/processed/churn_engineered_test.csv'
   feature_engineering_metadata: "logs/feature_engineering_metadata.json"
 
 # -----------------------------------------------------------------------------
