@@ -631,29 +631,35 @@ def main():
     
     # Load preprocessed data
     logger.info("Loading preprocessed data...")
-    df = load_csv_file(config['paths']['preprocessed_data'])
+    x_train_processed = load_csv_file(config['paths']['train_preprocessed_data'])
+    x_test_processed = load_csv_file(config['paths']['test_preprocessed_data'])
     
     # Initialize feature engineer
     engineer = ChurnFeatureEngineer('config/feature_engineering.yaml')
     
     # Engineer features
-    df_engineered = engineer.engineer_features(df)
+    x_train_engineered = engineer.engineer_features(x_train_processed)
+    x_test_engineered = engineer.engineer_features(x_test_processed)
     
     # Save engineered data
-    df_engineered.to_csv(config['paths']['engineered_data'], index=False)
+    x_train_engineered.to_csv(config['paths']['train_engineered_data'], index=False)
+    x_test_engineered.to_csv(config['paths']['test_engineered_data'], index=False)
     
     logger.info(f"\n✅ Feature engineering completed successfully!")
-    logger.info(f"📁 Engineered data saved to: {config['paths']['engineered_data']}")
-    logger.info(f"📊 Final shape: {df_engineered.shape}")
+    logger.info(f"📁 Engineered data saved to: {config['paths']['train_engineered_data']}")
+    logger.info(f"📁 Engineered data saved to: {config['paths']['test_engineered_data']}")
+    logger.info(f"📊 Final shape: {x_train_engineered.shape}")
+    logger.info(f'📊 Final shape: {x_test_engineered.shape}')
     logger.info(f"🆕 New features: {len(engineer.created_features)}")
     
     # Print summary
     print("\n" + "="*70)
     print("✅ CHURN FEATURE ENGINEERING COMPLETED SUCCESSFULLY!")
     print("="*70)
-    print(f"📁 Output: {config['paths']['engineered_data']}")
+    print(f"📁 Output: {config['paths']['train_engineered_data']}")
+    print(f"📁 Output: {config['paths']['test_engineered_data']}")
     print(f"📊 Initial shape: {engineer.metadata['initial_shape']}")
-    print(f"📊 Final shape: {df_engineered.shape}")
+    print(f"📊 Final shape: {x_train_engineered.shape}")
     print(f"🆕 New features created: {len(engineer.created_features)}")
     print("\n📋 Created Features by Type:")
     
