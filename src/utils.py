@@ -265,7 +265,7 @@ def save_joblib_file(data: Any, filename: str | Path) -> None:
     '''
     try:
         filepath = Path(filename)
-        with open(filepath,'w') as file:
+        with open(filepath,'wb') as file:
             joblib.dump(data, file)
         log.info(f'✅Data successfullt saved to {filepath}')
     except Exception as e:

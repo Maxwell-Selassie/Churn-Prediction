@@ -24,7 +24,7 @@ file_paths:
   raw_data: 'data/raw/e-commerce_data.csv'
   train_preprocessed_data: 'data/processed/cleaned_e-commerce_train.csv'
   test_processed_data: 'data/processed/cleaned_e-commerce_test.csv'
-  scalar_path: 'models/scalar.pkl'
+  scaler_path: 'models/scalar.pkl'
   preprocessing_metadata: 'data/preprocessing_metadata.json'
 
 # Columns to drop
