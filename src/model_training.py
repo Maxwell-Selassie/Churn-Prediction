@@ -165,4 +165,26 @@ class ChurnModelTrainer:
             removed = initial_features - len(selected_cols)
             log.info(f'Removed {removed} quasi-constant features')
 
-        # cor
+        # correlation features
+        if self.config['feature_selection']['correlation_filter']['enabled']:
+            threshold = self.config['feature_selection']['correlation_filter']['enabled']
+            log.info(f'Removing highly correlated features (threshold = {threshold})')
+
+            corr_matrix = self.x_train.corr().abs()
+            upper_triangle = corr_matrix.where(
+                np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
+            )
+
+            to_drop = [col for col in upper_triangle.columns if any(upper_triangle[col] > threshold)]
+
+            self.x_train = self.x_train.drop(columns=to_drop)
+            self.x_val = self.x_val.drop(columns=to_drop)
+            self.x_test = self.x_test.drop(columns=to_drop)
+
+            log.info(f'Removed {len(to_drop)} highly correlated features')
+
+        final_features = self.x_train.shape[1]
+        log.info(f'Features after filtering: {initial_features} -> {final_features}')
+
+
+        
