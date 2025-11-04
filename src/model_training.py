@@ -187,4 +187,15 @@ class ChurnModelTrainer:
         log.info(f'Features after filtering: {initial_features} -> {final_features}')
 
 
-        
+    def analyze_feature_importance(self, model, x, y, model_name: str):
+        '''Comprehensive feature importance analysis'''
+        log.info(f'Analyzing feature importance for {model_name}')
+
+        importance_dict = {}
+
+        # tree based models
+        if hasattr(model, 'feature_importances_'):
+            importance_dict['tree_importance'] = model.feature_importances_
+            log.info('Tree importance extracted')
+
+        # permutation importance
