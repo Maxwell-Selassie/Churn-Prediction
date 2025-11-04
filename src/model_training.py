@@ -146,3 +146,23 @@ class ChurnModelTrainer:
             return 
         
         initial_features = self.x_train.shape[1]
+
+        # variance threshold
+        if self.config['feature_selection']['initial_filter']['enabled']:
+            threshold = self.config['feature_selection']['initial_filter']['variance_threshold']
+            log.info(f'Removing low-variance features (threshold = {threshold})')
+
+            selector = VarianceThreshold(threshold=threshold)
+            selector.fit(self.x_train)
+
+            selected_mask = selector.get_support()
+            selected_cols = self.x_train.columns[selected_mask].tolist()
+
+            self.x_train = self.x_train[selected_cols]
+            self.x_test = self.x_test[selected_cols]
+            self.x_val = self.x_val[selected_cols]
+
+            removed = initial_features - len(selected_cols)
+            log.info(f'Removed {removed} quasi-constant features')
+
+        # cor
