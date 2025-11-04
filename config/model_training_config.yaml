@@ -22,10 +22,9 @@ project:
 # -----------------------------------------------------------------------------
 paths:
   # Data paths
-  engineered_data: "data/processed/churn_engineered.csv"
   y_train_data: "data/processed/y_train.csv"
-  x_train_data: 'data/processed/x_train.csv'
-  x_test_data: "data/processed/x_test.csv"
+  x_train_data: 'data/processed/churn_engineered_train.csv'
+  x_test_data: "data/processed/churn_engineered_test.csv"
   y_test_data: "data/processed/y_test.csv"
   
   # Model artifacts
