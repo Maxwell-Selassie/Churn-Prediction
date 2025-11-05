@@ -249,3 +249,27 @@ class ChurnModelTrainer:
         
         return importance_df
 
+    def select_features(self, importance_df):
+        '''select best features based on importance'''
+        log.info('='*50)
+        log.info('PERFORMING FEATURE SELECTION')
+        log.info('='*50)
+
+        config = self.config['feature_selection']['iterative_selection']
+        top_k = self.config['feature_selection']['top_k_features']
+
+        selected_features = importance_df.head(top_k)['feature'].tolist()
+        log.info(f'Selected {len(selected_features)} features')
+        log.info('Top 10 features : ')
+        for i, row in importance_df.head(10).iterrows():
+            log.info(f'{row['feature']}: rank={row['avg_rank']:.1f}')
+
+        self.selected_features = selected_features
+        self.feature_importance_df = importance_df
+
+        importance_df.to_csv(self.config['paths']['feature_importance_path'], index=False)
+        
+        with open(self.config['paths']['selected_features_path'], 'w') as f:
+            json.dump({'selected_features': selected_features}, f, indent=4)
+        
+        return selected_features
