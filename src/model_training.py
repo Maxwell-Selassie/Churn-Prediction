@@ -199,3 +199,53 @@ class ChurnModelTrainer:
             log.info('Tree importance extracted')
 
         # permutation importance
+        if not self.config['explainability']['feature_importance']['methods']:
+            log.info(f'Feature importance disabled!')
+
+        if 'permutation' in self.config['explainability']['feature_importance']['methods']:
+            n_repeats = self.config['explainability']['feature_importance']['n_repeats']
+
+            perm_importance = permutation_importance(
+                model, x, y, n_repeats=n_repeats, random_state=42, n_jobs=-1
+            )
+            importance_dict['perm_importance'] = perm_importance.importances_mean
+            log.info(f'Permutation importance calculated!')
+
+        # SHAP values
+        if shap_available and self.config['explainability']['shap']['enabled']:
+            try:
+                sample_size = min(len(x), self.config['explainability']['shap']['sample_size'])
+                x_sample = x.sample(n=sample_size, random_state = 42)
+
+                if hasattr(model,'predict_proba'):
+                    explainer = shap.TreeExplainer(model)
+                    shap_values = explainer.shap_values(x_sample)
+
+                    if isinstance(shap_values, list):
+                        shap_values = shap_values[1]
+
+                    importance_dict['shap_importance'] = np.abs(shap_values).mean(axis=0)
+                    log.info('SHAP values calculated')
+            except Exception as e:
+                log.warning(f'SHAP calculation failed: {e}')
+
+
+        # combine importances
+        importance_df = pd.DataFrame({
+            'features' : x.columns
+        })
+
+        for imp_name, imp_values in importance_dict.items():
+            importance_df[imp_name] = imp_values
+
+        # average rank across methods
+        rank_columns = [col for col in importance_df.columns if col != 'feature']
+        for col in rank_columns:
+            importance_df[f'{col}_rank'] = importance_df[col].rank(ascending=False)
+        
+        rank_cols = [col for col in importance_df.columns if col.endswith('_rank')]
+        importance_df['avg_rank'] = importance_df[rank_cols].mean(axis=1)
+        importance_df = importance_df.sort_values('avg_rank')
+        
+        return importance_df
+
