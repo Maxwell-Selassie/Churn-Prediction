@@ -22,10 +22,10 @@ project:
 # -----------------------------------------------------------------------------
 paths:
   # Data paths
-  y_train_data: "data/processed/y_train.csv"
+  y_train_data: "data/splits/y_train.csv"
   x_train_data: 'data/processed/churn_engineered_train.csv'
   x_test_data: "data/processed/churn_engineered_test.csv"
-  y_test_data: "data/processed/y_test.csv"
+  y_test_data: "data/splits/y_test.csv"
   
   # Model artifacts
   models_dir: "models"
