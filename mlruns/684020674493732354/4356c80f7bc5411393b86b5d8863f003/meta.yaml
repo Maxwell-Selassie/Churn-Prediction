@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/Maxwe/OneDrive/Documents/Classification/Churn Prediction/Churn-Prediction/mlruns/684020674493732354/4356c80f7bc5411393b86b5d8863f003/artifacts
+end_time: 1762454563763
+entry_point_name: ''
+experiment_id: '684020674493732354'
+lifecycle_stage: active
+run_id: 4356c80f7bc5411393b86b5d8863f003
+run_name: churn_training_pipeline
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762454559262
+status: 4
+tags: []
+user_id: Maxwe

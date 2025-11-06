@@ -1,0 +1,7 @@
+artifact_location: file:///C:/Users/Maxwe/OneDrive/Documents/Classification/Churn
+  Prediction/Churn-Prediction/mlruns/684020674493732354
+creation_time: 1762454550783
+experiment_id: '684020674493732354'
+last_update_time: 1762454550783
+lifecycle_stage: active
+name: churn_prediction
