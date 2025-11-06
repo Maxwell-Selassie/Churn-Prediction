@@ -289,18 +289,17 @@ class ChurnFeatureEngineer:
                 days_since = row['DaySinceLastOrder']
                 
                 if tenure < 3:
-                    return 'New'
+                    return '1'
                 elif tenure >= 3 and tenure < 12 and order_count < 10:
-                    return 'Growing'
+                    return '2'
                 elif tenure >= 12 and order_count >= 10 and days_since < 30:
-                    return 'Mature'
+                    return '3'
                 elif days_since >= 30 and days_since < 60:
-                    return 'At-Risk'
+                    return '4'
                 elif days_since >= 60:
-                    return 'Dormant'
+                    return '5'
                 else:
-                    return 'Growing'
-            
+                    return '6'
             if self._validate_columns(df, ['Tenure', 'OrderCount', 'DaySinceLastOrder']):
                 df['customer_lifecycle_stage'] = df.apply(assign_lifecycle_stage, axis=1)
                 self._log_feature_creation('customer_lifecycle_stage', 'domain', 
@@ -315,11 +314,11 @@ class ChurnFeatureEngineer:
                 cashback = row['CashbackAmount']
                 
                 if order_count >= 20 and cashback >= 200:
-                    return 'High'
+                    return '3'
                 elif order_count >= 10 and cashback >= 100:
-                    return 'Medium'
+                    return '2'
                 else:
-                    return 'Low'
+                    return '1'
             
             if self._validate_columns(df, ['OrderCount', 'CashbackAmount']):
                 df['value_tier'] = df.apply(assign_value_tier, axis=1)
