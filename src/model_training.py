@@ -9,15 +9,16 @@ import warnings
 warnings.filterwarnings('ignore')
 # sklearn imports
 from sklearn.model_selection import (
-    train_test_split, GridSearchCV, cross_val_score
+    train_test_split, GridSearchCV, cross_val_score, StratifiedKFold
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
-    classification_report, confusion_matrix, precision_score, recall_score, f1_score,
+    classification_report, confusion_matrix, precision_score, recall_score, f1_score,accuracy_score,
     brier_score_loss, log_loss, roc_curve, roc_auc_score, average_precision_score, precision_recall_curve
 )
 from sklearn.feature_selection import VarianceThreshold, f_classif, SelectKBest
 from sklearn.inspection import permutation_importance
+import pickle
 # external imports
 try:
     from xgboost import XGBClassifier
@@ -63,7 +64,7 @@ class ChurnModelTrainer:
     '''
     def __init__(self, config_path: str | Path = 'config/model_training_config.yaml'):
         '''Initialize trainer with configuration'''
-        log.info(f'{'INITIALIZING CHURN MODEL TRAINING PIPELINE':_^30}')
+        log.info(f'INITIALIZING CHURN MODEL TRAINING PIPELINE')
         
         self.config = read_yaml_file(config_path)
         self.config_path = config_path
@@ -100,7 +101,7 @@ class ChurnModelTrainer:
     # ==========================
     def laod_and_split_data(self):
         '''Load engineered data and split train set into train/val sets'''
-        log.info(f'{'LOADING AND SPLITTING DATA':_^39}')
+        log.info('LOADING AND SPLITTING DATA')
 
         # load engineered file
         X_train = load_csv_file(self.config['paths']['x_train_data'])
@@ -262,7 +263,9 @@ class ChurnModelTrainer:
         log.info(f'Selected {len(selected_features)} features')
         log.info('Top 10 features : ')
         for i, row in importance_df.head(10).iterrows():
-            log.info(f'{row['feature']}: rank={row['avg_rank']:.1f}')
+            rank = row['avg_rank']
+            row_feature = row['feature']
+            log.info(f'{row_feature}: rank={rank:.1f}')
 
         self.selected_features = selected_features
         self.feature_importance_df = importance_df
@@ -273,3 +276,293 @@ class ChurnModelTrainer:
             json.dump({'selected_features': selected_features}, f, indent=4)
         
         return selected_features
+    
+    def get_params_and_model(self, model_name: str, phase: str):
+        '''Get model instance and hyperparameter grid'''
+        model_config = self.config['models'][model_name]
+
+        if not model_config['enabled']:
+            return None, None
+        
+        # import model class
+        class_path = model_config['class']
+        module_name, class_name = class_path.rsplit('.',1)
+
+        if 'xgboost' in module_name and not xgboost_available:
+            log.warning(f'XGBoost not available. Skipping {model_name}')
+            return None, None
+
+        if 'lightgbm' in module_name and not light_gbm_available:
+            log.warning(f'LightGBM not available. Skipping {model_name}')
+            return None, None
+        
+        # get model class
+        if 'sklearn' in module_name:
+            from sklearn import linear_model, ensemble, tree
+            module = eval(module_name.split('.')[-1])
+        elif 'xgboost' in module_name:
+            module = XGBClassifier
+
+        elif 'lightgbm' in module_name:
+            module = lightgbm
+
+        model_class = getattr(module, class_name)
+
+        # initialize model
+        init_params = model_config['init_params']
+        model = model_class(**init_params)
+
+        # get params grid
+        params_grid_key = f'params_grid_{phase}'
+        params_grid = model_config.get(params_grid_key, {})
+
+        return model, params_grid
+    
+    def train_model(self, model_name: str, x_train, y_train, x_val, y_val, phase: str):
+        '''Train a single model with GridSearchCV'''
+        log.info(f'Training {model_name} : ({phase})...')
+
+        # get model and parameters
+        model, params_grid = self.get_params_and_model(model_name, phase)
+        if model is None:
+            return None
+
+        # setup cross-validation
+        cv_config = self.config['training']
+        cv = StratifiedKFold(
+            n_splits=cv_config.get('n_splits',5),
+            shuffle=cv_config.get('shuffle', True),
+            random_state=cv_config.get('random_state',1)
+        )     
+
+        # GridSearchCV
+        grid_config = self.config['grid_search']
+        grid_search = GridSearchCV(
+            estimator= model,
+            param_grid=params_grid,
+            cv=cv,
+            scoring=grid_config.get('scoring','f1'),
+            refit= grid_config.get('refit', True),
+            return_train_score=grid_config.get('return_train_score',True),
+            n_jobs= grid_config.get('n_jobs',-1),
+            verbose=grid_config.get('verbose',1),
+            error_score=grid_config.get('error_score','raise')
+        )
+
+        grid_search.fit(x_train, y_train)
+
+        # best model
+        best_model = grid_search.best_estimator_
+        best_score = grid_search.best_score_
+        best_params = grid_search.best_params_
+
+        # validation evaluation
+        val_pred = best_model.predict(x_val)
+        val_pred_proba = best_model.predict_proba(x_val)[:,1]
+
+        val_metrics = {
+            'accuracy': accuracy_score(y_val, val_pred),
+            'precision': precision_score(y_val, val_pred),
+            'recall': recall_score(y_val, val_pred),
+            'f1': f1_score(y_val, val_pred),
+            'roc_auc': roc_auc_score(y_val, val_pred_proba)
+        }
+
+        log.info(f"✓ {model_name} - CV Score: {best_score:.4f}, Val ROC-AUC: {val_metrics['roc_auc']:.4f}")
+        
+        return {
+            'model': best_model,
+            'model_name': model_name,
+            'best_params': best_params,
+            'cv_score': best_score,
+            'val_metrics': val_metrics,
+            'grid_search': grid_search
+        }
+
+    def train_all_models(self,phase: str, x_train, y_train, x_val, y_val):
+        '''Train all enabled models'''
+        log.info('='*50)
+        log.info(f'TRAINING MODELS - {phase.upper()}')
+        log.info('='*50)
+
+        results = {}
+
+        for model_name in self.config['models'].keys():
+            if not self.config[model_name]['enabled']:
+                continue
+
+            with mlflow.start_run(run_name=f'{model_name}_{phase}', nested=True):
+                # log phase and config
+                mlflow.log_param('phase',phase)
+                mlflow.log_param('n_features',x_train.shape[1])
+                mlflow.log_param('n_samples',x_train.shape[0])
+
+            # train
+            result = self.train_model(model_name, x_train, y_train, x_val, y_val)
+
+            if result is None:
+                continue
+
+            # log metrics
+            mlflow.log_metric('cv_score', result['cv_score'])
+            for metric_name, metric_value in results['val_metrics'].items():
+                mlflow.metric(f'val_{metric_name}', metric_value)
+
+            # log params
+            for params_name, params_value in results['best_params'].items():
+                mlflow.log_param(params_name, params_value)
+
+            # save model
+            model_path = f"{self.config['paths']['models_dir']}/{model_name}_{phase}.pkl"
+            with open(model_path, 'wb') as f:
+                pickle.dump(result['model'], f)
+            mlflow.log_artifact(model_path)
+                
+            results[model_name] = result
+        
+        return results
+
+# ========================================================================
+    # MAIN PIPELINE
+    # ========================================================================
+    
+    def run_pipeline(self):
+        """Execute complete training pipeline"""
+        log.info('\n' + '='*70)
+        log.info('STARTING MODEL TRAINING PIPELINE')
+        log.info('='*70)
+        
+        with mlflow.start_run(run_name="churn_training_pipeline"):
+            # Log config
+            mlflow.log_params({
+                'project_version': self.config['project']['version'],
+                'random_seed': self.config['reproducibility']['random_seed']
+            })
+            
+            # Phase 1: Load and split data
+            self.laod_and_split_data()
+            
+            # Phase 2: Initial feature filtering
+            self.initial_feature_filter()
+            
+            # Phase 3: Train initial models with all features
+            if self.config['training']['phases']['phase_1']['enabled']:
+                log.info('\n' + '='*70)
+                log.info('PHASE 1: INITIAL TRAINING (ALL FEATURES)')
+                log.info('='*70)
+                
+                phase1_results = self.train_all_models(
+                    'phase1', self.x_train, self.y_train, self.x_val, self.y_val
+                )
+                
+                # Find best model
+                best_model_name = max(
+                    phase1_results.keys(),
+                    key=lambda x: phase1_results[x]['val_metrics']['roc_auc']
+                )
+                best_model_result = phase1_results[best_model_name]
+                
+                log.info(f"\n✓ Best Phase 1 Model: {best_model_name}")
+                log.info(f"  ROC-AUC: {best_model_result['val_metrics']['roc_auc']:.4f}")
+                
+                # Phase 4: Feature importance analysis
+                if self.config['training']['phases']['phase_2']['enabled']:
+                    log.info('\n' + '='*70)
+                    log.info('PHASE 2: FEATURE IMPORTANCE ANALYSIS')
+                    log.info('='*70)
+                    
+                    importance_df = self.analyze_feature_importance(
+                        best_model_result['model'],
+                        self.x_val,
+                        self.y_val,
+                        best_model_name
+                    )
+                    
+                    selected_features = self.select_features(importance_df)
+                    
+                    # Update datasets with selected features
+                    self.x_train = self.x_train[selected_features]
+                    self.x_val = self.x_val[selected_features]
+                    self.x_test = self.x_test[selected_features]
+            
+            # Phase 5: Retrain with selected features
+            if self.config['training']['phases']['phase_3']['enabled'] and self.selected_features:
+                log.info('\n' + '='*70)
+                log.info('PHASE 3: RETRAIN WITH SELECTED FEATURES')
+                log.info('='*70)
+                
+                phase3_results = self.train_all_models(
+                    'phase3', self.x_train, self.y_train, self.x_val, self.y_val
+                )
+                
+                # Find best model
+                best_model_name = max(
+                    phase3_results.keys(),
+                    key=lambda x: phase3_results[x]['val_metrics']['roc_auc']
+                )
+                best_model_result = phase3_results[best_model_name]
+                
+                self.best_model = best_model_result['model']
+                self.best_model_name = best_model_name
+                self.best_score = best_model_result['val_metrics']['roc_auc']
+                
+                log.info(f"\n✓ Best Phase 3 Model: {best_model_name}")
+                log.info(f"  ROC-AUC: {self.best_score:.4f}")
+            
+            # Final evaluation on test set
+            self.evaluate_final_model()
+            
+            log.info('\n' + '='*70)
+            log.info('✓ PIPELINE COMPLETED SUCCESSFULLY')
+            log.info('='*70)
+    
+    def evaluate_final_model(self):
+        """Evaluate best model on test set"""
+        log.info('\n' + '='*70)
+        log.info('FINAL MODEL EVALUATION ON TEST SET')
+        log.info('='*70)
+        
+        if self.best_model is None:
+            log.warning("No best model found")
+            return
+        
+        # Predict
+        y_pred = self.best_model.predict(self.X_test)
+        y_pred_proba = self.best_model.predict_proba(self.X_test)[:, 1]
+        
+        # Metrics
+        test_metrics = {
+            'accuracy': accuracy_score(self.y_test, y_pred),
+            'precision': precision_score(self.y_test, y_pred),
+            'recall': recall_score(self.y_test, y_pred),
+            'f1': f1_score(self.y_test, y_pred),
+            'roc_auc': roc_auc_score(self.y_test, y_pred_proba)
+        }
+        
+        log.info(f"\nFinal Model: {self.best_model_name}")
+        log.info(f"Test Set Performance:")
+        for metric, value in test_metrics.items():
+            log.info(f"  {metric}: {value:.4f}")
+            mlflow.log_metric(f"test_{metric}", value)
+        
+        # Classification report
+        report = classification_report(self.y_test, y_pred)
+        log.info(f"\nClassification Report:\n{report}")
+        
+        # Save best model
+        best_model_path = self.config['paths']['best_model_path']
+        with open(best_model_path, 'wb') as f:
+            pickle.dump(self.best_model, f)
+        mlflow.log_artifact(best_model_path)
+        
+        log.info(f"✓ Best model saved to {best_model_path}")
+
+
+def main():
+    """Main execution"""
+    trainer = ChurnModelTrainer('config/model_training_config.yaml')
+    trainer.run_pipeline()
+
+
+if __name__ == '__main__':
+    main()
