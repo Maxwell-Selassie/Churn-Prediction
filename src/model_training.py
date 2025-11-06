@@ -99,7 +99,7 @@ class ChurnModelTrainer:
     # ==========================
     # DATA SPLITTING AND LOADING
     # ==========================
-    def laod_and_split_data(self):
+    def load_and_split_data(self):
         '''Load engineered data and split train set into train/val sets'''
         log.info('LOADING AND SPLITTING DATA')
 
@@ -168,7 +168,7 @@ class ChurnModelTrainer:
 
         # correlation features
         if self.config['feature_selection']['correlation_filter']['enabled']:
-            threshold = self.config['feature_selection']['correlation_filter']['enabled']
+            threshold = self.config['feature_selection']['correlation_filter']['threshold']
             log.info(f'Removing highly correlated features (threshold = {threshold})')
 
             corr_matrix = self.x_train.corr().abs()
@@ -388,7 +388,7 @@ class ChurnModelTrainer:
         results = {}
 
         for model_name in self.config['models'].keys():
-            if not self.config[model_name]['enabled']:
+            if not self.config['models'][model_name]['enabled']:
                 continue
 
             with mlflow.start_run(run_name=f'{model_name}_{phase}', nested=True):
@@ -404,7 +404,7 @@ class ChurnModelTrainer:
                 continue
 
             # log metrics
-            mlflow.log_metric('cv_score', result['cv_score'])
+            mlflow.log_metric('cv_score', results['cv_score'])
             for metric_name, metric_value in results['val_metrics'].items():
                 mlflow.metric(f'val_{metric_name}', metric_value)
 
@@ -440,7 +440,7 @@ class ChurnModelTrainer:
             })
             
             # Phase 1: Load and split data
-            self.laod_and_split_data()
+            self.load_and_split_data()
             
             # Phase 2: Initial feature filtering
             self.initial_feature_filter()
@@ -527,8 +527,8 @@ class ChurnModelTrainer:
             return
         
         # Predict
-        y_pred = self.best_model.predict(self.X_test)
-        y_pred_proba = self.best_model.predict_proba(self.X_test)[:, 1]
+        y_pred = self.best_model.predict(self.x_test)
+        y_pred_proba = self.best_model.predict_proba(self.x_test)[:, 1]
         
         # Metrics
         test_metrics = {
