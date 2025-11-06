@@ -429,49 +429,6 @@ class ChurnFeatureEngineer:
         
         return df
     
-    # ========================================================================
-    # BINNING FEATURES
-    # ========================================================================
-    
-    def create_binning_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Create binned/discretized versions of continuous features
-        Useful for capturing non-linear patterns and interpretability
-        """
-        logger.info('-'*70)
-        logger.info('STEP 5: CREATING BINNING FEATURES')
-        logger.info('-'*70)
-        
-        if 'binning' not in self.config or not self.config['binning'].get('enabled', False):
-            logger.info("Binning features disabled in config")
-            return df
-        
-        for bin_feature in self.config['binning'].get('features', []):
-            source_col = bin_feature['column']
-            feature_name = bin_feature['name']
-            bins = bin_feature['bins']
-            labels = bin_feature.get('labels', None)
-            reason = bin_feature.get('reason', 'No reason provided')
-            
-            # Validate column exists
-            if source_col not in df.columns:
-                logger.warning(f"Column {source_col} not found")
-                continue
-            
-            try:
-                df[feature_name] = pd.cut(
-                    df[source_col],
-                    bins=bins,
-                    labels=labels,
-                    include_lowest=True
-                )
-                
-                self._log_feature_creation(feature_name, 'binning', reason)
-            
-            except Exception as e:
-                logger.error(f"Error creating {feature_name}: {e}")
-        
-        return df
     
     # ========================================================================
     # POLYNOMIAL FEATURES
@@ -586,7 +543,6 @@ class ChurnFeatureEngineer:
         df = self.create_aggregate_features(df)
         df = self.create_interaction_features(df)
         df = self.create_domain_features(df)
-        df = self.create_binning_features(df)
         df = self.create_polynomial_features(df)
         df = self.create_statistical_features(df)
         
