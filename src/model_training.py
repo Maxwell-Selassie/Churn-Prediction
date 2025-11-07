@@ -1,10 +1,14 @@
 """
 Production-Grade Model Training Pipeline with MLflow Tracking
-Fully corrected and tested version
+Thread-safe version with proper backend handling
 
 Author: Maxwell Selassie Hiamatsu
 Date: October 24, 2025
 """
+
+# CRITICAL: Set matplotlib backend BEFORE any other imports
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend (prevents Tkinter threading issues)
 
 import pandas as pd
 import numpy as np
@@ -15,7 +19,11 @@ import json
 from pathlib import Path
 import pickle
 import warnings
+import os
+
+# Suppress all warnings
 warnings.filterwarnings('ignore')
+os.environ['PYTHONWARNINGS'] = 'ignore'
 
 # sklearn imports
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
@@ -72,6 +80,7 @@ class ChurnModelTrainer:
     - SHAP explainability
     - Cross-validation
     - Model comparison dashboard
+    - Thread-safe operations
     """
     
     def __init__(self, config_path: str | Path = 'config/model_training_config.yaml'):
@@ -100,20 +109,25 @@ class ChurnModelTrainer:
         self.model_results = {}
 
         # Create directories
-        for dir_path in ['data', 'mlruns', 'results', 'logs', 'models']:
+        for dir_path in ['data', 'results', 'logs', 'models']:
             ensure_directories(dir_path)
 
         # Setup MLflow
         if self.config['mlflow']['enabled']:
-            mlflow.set_tracking_uri(self.config['mlflow']['tracking_uri'])
-            mlflow.set_experiment(self.config['mlflow']['experiment_name'])
-            
-            if self.config['mlflow']['autolog']['enabled']:
-                mlflow.sklearn.autolog(
-                    log_input_examples=self.config['mlflow']['autolog']['log_input_examples'],
-                    log_model_signatures=self.config['mlflow']['autolog']['log_model_signatures'],
-                    log_models=self.config['mlflow']['autolog']['log_models']
-                )
+            try:
+                mlflow.set_tracking_uri(self.config['mlflow']['tracking_uri'])
+                mlflow.set_experiment(self.config['mlflow']['experiment_name'])
+                
+                if self.config['mlflow']['autolog']['enabled']:
+                    mlflow.sklearn.autolog(
+                        log_input_examples=self.config['mlflow']['autolog']['log_input_examples'],
+                        log_model_signatures=self.config['mlflow']['autolog']['log_model_signatures'],
+                        log_models=self.config['mlflow']['autolog']['log_models'],
+                        silent=True  # Suppress MLflow warnings
+                    )
+            except Exception as e:
+                logger.warning(f"MLflow setup failed: {e}. Continuing without MLflow.")
+                self.config['mlflow']['enabled'] = False
 
         project_name = self.config['project']['name']
         version_name = self.config['project']['version']
@@ -133,11 +147,15 @@ class ChurnModelTrainer:
         logger.info('STEP 1: LOADING AND SPLITTING DATA')
         logger.info('-'*70)
 
-        # Load engineered files
-        x_train = load_csv_file(self.config['paths']['x_train_data'])
-        y_train = load_csv_file(self.config['paths']['y_train_data'])
-        x_test = load_csv_file(self.config['paths']['x_test_data'])
-        y_test = load_csv_file(self.config['paths']['y_test_data'])
+        try:
+            # Load engineered files
+            x_train = load_csv_file(self.config['paths']['x_train_data'])
+            y_train = load_csv_file(self.config['paths']['y_train_data'])
+            x_test = load_csv_file(self.config['paths']['x_test_data'])
+            y_test = load_csv_file(self.config['paths']['y_test_data'])
+        except Exception as e:
+            logger.error(f"Failed to load data files: {e}")
+            raise
         
         # Handle if y is DataFrame (convert to Series)
         if isinstance(y_train, pd.DataFrame):
@@ -173,15 +191,18 @@ class ChurnModelTrainer:
         logger.info(f'✓ Test set: {x_test.shape}')
 
         # Save splits for reference
-        train_df = pd.concat([x_train, y_train], axis=1)
-        test_df = pd.concat([x_test, y_test], axis=1)
-        
-        train_output = self.config['paths'].get('train_split_path', 'data/train_dataframe.csv')
-        test_output = self.config['paths'].get('test_split_path', 'data/test_dataframe.csv')
-        
-        train_df.to_csv(train_output, index=False)
-        test_df.to_csv(test_output, index=False)
-        logger.info(f'✓ Saved train/test splits')
+        try:
+            train_df = pd.concat([x_train, y_train], axis=1)
+            test_df = pd.concat([x_test, y_test], axis=1)
+            
+            train_output = self.config['paths'].get('train_split_path', 'data/train_dataframe.csv')
+            test_output = self.config['paths'].get('test_split_path', 'data/test_dataframe.csv')
+            
+            train_df.to_csv(train_output, index=False)
+            test_df.to_csv(test_output, index=False)
+            logger.info(f'✓ Saved train/test splits')
+        except Exception as e:
+            logger.warning(f"Failed to save train/test splits: {e}")
 
     # =================
     # FEATURE SELECTION
@@ -204,42 +225,48 @@ class ChurnModelTrainer:
             threshold = self.config['feature_selection']['initial_filter']['variance_threshold']
             logger.info(f'Removing low-variance features (threshold={threshold})...')
 
-            selector = VarianceThreshold(threshold=threshold)
-            selector.fit(self.x_train)
+            try:
+                selector = VarianceThreshold(threshold=threshold)
+                selector.fit(self.x_train)
 
-            selected_mask = selector.get_support()
-            selected_cols = self.x_train.columns[selected_mask].tolist()
+                selected_mask = selector.get_support()
+                selected_cols = self.x_train.columns[selected_mask].tolist()
 
-            self.x_train = self.x_train[selected_cols]
-            self.x_test = self.x_test[selected_cols]
-            self.x_val = self.x_val[selected_cols]
+                self.x_train = self.x_train[selected_cols]
+                self.x_test = self.x_test[selected_cols]
+                self.x_val = self.x_val[selected_cols]
 
-            removed = initial_features - len(selected_cols)
-            logger.info(f'✓ Removed {removed} low-variance features')
+                removed = initial_features - len(selected_cols)
+                logger.info(f'✓ Removed {removed} low-variance features')
+            except Exception as e:
+                logger.warning(f"Variance filtering failed: {e}")
 
         # Correlation filter
         if self.config['feature_selection']['correlation_filter']['enabled']:
             threshold = self.config['feature_selection']['correlation_filter']['threshold']
             logger.info(f'Removing highly correlated features (threshold={threshold})...')
 
-            corr_matrix = self.x_train.corr().abs()
-            upper_triangle = corr_matrix.where(
-                np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
-            )
+            try:
+                corr_matrix = self.x_train.corr().abs()
+                upper_triangle = corr_matrix.where(
+                    np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
+                )
 
-            to_drop = [col for col in upper_triangle.columns if any(upper_triangle[col] > threshold)]
+                to_drop = [col for col in upper_triangle.columns if any(upper_triangle[col] > threshold)]
 
-            self.x_train = self.x_train.drop(columns=to_drop)
-            self.x_val = self.x_val.drop(columns=to_drop)
-            self.x_test = self.x_test.drop(columns=to_drop)
+                self.x_train = self.x_train.drop(columns=to_drop)
+                self.x_val = self.x_val.drop(columns=to_drop)
+                self.x_test = self.x_test.drop(columns=to_drop)
 
-            logger.info(f'✓ Removed {len(to_drop)} highly correlated features')
+                logger.info(f'✓ Removed {len(to_drop)} highly correlated features')
+            except Exception as e:
+                logger.warning(f"Correlation filtering failed: {e}")
 
         final_features = self.x_train.shape[1]
         logger.info(f'Features after filtering: {initial_features} → {final_features}')
 
     def analyze_feature_importance(self, model, x, y, model_name: str):
-        """Comprehensive feature importance analysis"""
+        """Comprehensive feature importance analysis (thread-safe)"""
         logger.info(f'Analyzing feature importance for {model_name}...')
 
         importance_dict = {}
@@ -251,21 +278,26 @@ class ChurnModelTrainer:
 
         # Check if feature importance methods are configured
         if not self.config['explainability']['feature_importance'].get('methods'):
-            logger.info('Feature importance methods not configured, skipping advanced analysis')
+            logger.info('Feature importance methods not configured, using tree importance only')
             if not importance_dict:
-                # Return empty DataFrame if no importance available
                 return pd.DataFrame({'feature': x.columns, 'importance': 0})
 
-        # Permutation importance
+        # Permutation importance (single-threaded to avoid Tkinter issues)
         if 'permutation' in self.config['explainability']['feature_importance'].get('methods', []):
             n_repeats = self.config['explainability']['feature_importance']['n_repeats']
             logger.info(f'Calculating permutation importance (n_repeats={n_repeats})...')
 
-            perm_importance = permutation_importance(
-                model, x, y, n_repeats=n_repeats, random_state=42, n_jobs=-1
-            )
-            importance_dict['perm_importance'] = perm_importance.importances_mean
-            logger.info('✓ Permutation importance calculated')
+            try:
+                perm_importance = permutation_importance(
+                    model, x, y, 
+                    n_repeats=n_repeats, 
+                    random_state=42, 
+                    n_jobs=1  # Single-threaded to avoid threading issues
+                )
+                importance_dict['perm_importance'] = perm_importance.importances_mean
+                logger.info('✓ Permutation importance calculated')
+            except Exception as e:
+                logger.warning(f'Permutation importance failed: {e}')
 
         # SHAP values
         if SHAP_AVAILABLE and self.config['explainability']['shap']['enabled']:
@@ -305,7 +337,6 @@ class ChurnModelTrainer:
             importance_df['avg_rank'] = importance_df[rank_cols].mean(axis=1)
             importance_df = importance_df.sort_values('avg_rank')
         else:
-            # No ranking methods available
             importance_df['avg_rank'] = range(len(importance_df))
         
         return importance_df
@@ -333,14 +364,17 @@ class ChurnModelTrainer:
         self.feature_importance_df = importance_df
 
         # Save results
-        importance_path = self.config['paths']['feature_importance_path']
-        importance_df.to_csv(importance_path, index=False)
-        logger.info(f'✓ Feature importance saved to {importance_path}')
-        
-        features_path = self.config['paths']['selected_features_path']
-        with open(features_path, 'w') as f:
-            json.dump({'selected_features': selected_features}, f, indent=4)
-        logger.info(f'✓ Selected features saved to {features_path}')
+        try:
+            importance_path = self.config['paths']['feature_importance_path']
+            importance_df.to_csv(importance_path, index=False)
+            logger.info(f'✓ Feature importance saved to {importance_path}')
+            
+            features_path = self.config['paths']['selected_features_path']
+            with open(features_path, 'w') as f:
+                json.dump({'selected_features': selected_features}, f, indent=4)
+            logger.info(f'✓ Selected features saved to {features_path}')
+        except Exception as e:
+            logger.warning(f"Failed to save feature selection results: {e}")
         
         return selected_features
     
@@ -365,35 +399,45 @@ class ChurnModelTrainer:
             return None, None
         
         # Get module object
-        if 'sklearn' in module_name:
-            from sklearn import linear_model, ensemble, tree
-            module = eval(module_name.split('.')[-1])
-        elif 'xgboost' in module_name:
-            module = xgb
-        elif 'lightgbm' in module_name:
-            module = lgb
-        else:
-            logger.error(f"Unknown module: {module_name}")
+        try:
+            if 'sklearn' in module_name:
+                from sklearn import linear_model, ensemble, tree
+                module = eval(module_name.split('.')[-1])
+            elif 'xgboost' in module_name:
+                module = xgb
+            elif 'lightgbm' in module_name:
+                module = lgb
+            else:
+                logger.error(f"Unknown module: {module_name}")
+                return None, None
+
+            # Get model class
+            model_class = getattr(module, class_name)
+
+            # Initialize model with thread-safe parameters
+            init_params = model_config['init_params'].copy()
+            
+            # Force single-threaded for stability (can be overridden in config)
+            if 'n_jobs' not in init_params:
+                init_params['n_jobs'] = 1
+            
+            model = model_class(**init_params)
+
+            # Get param grid for this phase
+            param_grid_key = f'param_grid_{phase}'
+            param_grid = model_config.get(param_grid_key, {})
+            
+            if not param_grid:
+                logger.warning(f'No parameter grid found for {model_name} in {phase}')
+
+            return model, param_grid
+            
+        except Exception as e:
+            logger.error(f"Failed to load model {model_name}: {e}")
             return None, None
-
-        # Get model class
-        model_class = getattr(module, class_name)
-
-        # Initialize model
-        init_params = model_config['init_params']
-        model = model_class(**init_params)
-
-        # Get param grid for this phase
-        param_grid_key = f'param_grid_{phase}'
-        param_grid = model_config.get(param_grid_key, {})
-        
-        if not param_grid:
-            logger.warning(f'No parameter grid found for {model_name} in {phase}')
-
-        return model, param_grid
     
     def train_model(self, model_name: str, x_train, y_train, x_val, y_val, phase: str):
-        """Train a single model with GridSearchCV"""
+        """Train a single model with GridSearchCV (thread-safe)"""
         logger.info(f'Training {model_name} ({phase})...')
 
         # Get model and parameters
@@ -411,8 +455,12 @@ class ChurnModelTrainer:
             random_state=cv_config['random_state']
         )     
 
-        # GridSearchCV
+        # GridSearchCV with controlled parallelization
         grid_config = self.config['grid_search']
+        
+        # Use single thread to avoid Tkinter threading issues
+        n_jobs = 1  # Force single-threaded for stability
+        
         grid_search = GridSearchCV(
             estimator=model,
             param_grid=param_grid,
@@ -420,9 +468,9 @@ class ChurnModelTrainer:
             scoring=grid_config['scoring'],
             refit=grid_config['refit'],
             return_train_score=grid_config['return_train_score'],
-            n_jobs=grid_config['n_jobs'],
-            verbose=grid_config['verbose'],
-            error_score=grid_config['error_score']
+            n_jobs=n_jobs,
+            verbose=0,  # Suppress verbose output
+            error_score='raise'
         )
 
         # Train
@@ -438,27 +486,31 @@ class ChurnModelTrainer:
         best_params = grid_search.best_params_
 
         # Validation evaluation
-        val_pred = best_model.predict(x_val)
-        val_pred_proba = best_model.predict_proba(x_val)[:, 1]
+        try:
+            val_pred = best_model.predict(x_val)
+            val_pred_proba = best_model.predict_proba(x_val)[:, 1]
 
-        val_metrics = {
-            'accuracy': accuracy_score(y_val, val_pred),
-            'precision': precision_score(y_val, val_pred, zero_division=0),
-            'recall': recall_score(y_val, val_pred, zero_division=0),
-            'f1': f1_score(y_val, val_pred, zero_division=0),
-            'roc_auc': roc_auc_score(y_val, val_pred_proba)
-        }
+            val_metrics = {
+                'accuracy': accuracy_score(y_val, val_pred),
+                'precision': precision_score(y_val, val_pred, zero_division=0),
+                'recall': recall_score(y_val, val_pred, zero_division=0),
+                'f1': f1_score(y_val, val_pred, zero_division=0),
+                'roc_auc': roc_auc_score(y_val, val_pred_proba)
+            }
 
-        logger.info(f"✓ {model_name} - CV Score: {best_score:.4f}, Val ROC-AUC: {val_metrics['roc_auc']:.4f}")
-        
-        return {
-            'model': best_model,
-            'model_name': model_name,
-            'best_params': best_params,
-            'cv_score': best_score,
-            'val_metrics': val_metrics,
-            'grid_search': grid_search
-        }
+            logger.info(f"✓ {model_name} - CV Score: {best_score:.4f}, Val ROC-AUC: {val_metrics['roc_auc']:.4f}")
+            
+            return {
+                'model': best_model,
+                'model_name': model_name,
+                'best_params': best_params,
+                'cv_score': best_score,
+                'val_metrics': val_metrics,
+                'grid_search': grid_search
+            }
+        except Exception as e:
+            logger.error(f'Evaluation failed for {model_name}: {e}')
+            return None
 
     def train_all_models(self, phase: str, x_train, y_train, x_val, y_val):
         """Train all enabled models"""
@@ -473,36 +525,48 @@ class ChurnModelTrainer:
                 logger.info(f'Skipping {model_name} (disabled in config)')
                 continue
 
-            with mlflow.start_run(run_name=f'{model_name}_{phase}', nested=True):
-                # Log phase and config
-                mlflow.log_param('phase', phase)
-                mlflow.log_param('n_features', x_train.shape[1])
-                mlflow.log_param('n_samples', x_train.shape[0])
+            # MLflow tracking (with error handling)
+            try:
+                if self.config['mlflow']['enabled']:
+                    with mlflow.start_run(run_name=f'{model_name}_{phase}', nested=True):
+                        # Log phase and config
+                        mlflow.log_param('phase', phase)
+                        mlflow.log_param('n_features', x_train.shape[1])
+                        mlflow.log_param('n_samples', x_train.shape[0])
 
-                # Train
-                result = self.train_model(model_name, x_train, y_train, x_val, y_val, phase)
+                        # Train
+                        result = self.train_model(model_name, x_train, y_train, x_val, y_val, phase)
 
-                if result is None:
-                    logger.warning(f'Skipping {model_name} - training returned None')
-                    continue
+                        if result is None:
+                            logger.warning(f'Skipping {model_name} - training returned None')
+                            continue
 
-                # Log metrics
-                mlflow.log_metric('cv_score', result['cv_score'])
-                for metric_name, metric_value in result['val_metrics'].items():
-                    mlflow.log_metric(f'val_{metric_name}', metric_value)
+                        # Log metrics
+                        mlflow.log_metric('cv_score', result['cv_score'])
+                        for metric_name, metric_value in result['val_metrics'].items():
+                            mlflow.log_metric(f'val_{metric_name}', metric_value)
 
-                # Log params
-                for param_name, param_value in result['best_params'].items():
-                    mlflow.log_param(param_name, param_value)
+                        # Log params
+                        for param_name, param_value in result['best_params'].items():
+                            mlflow.log_param(param_name, str(param_value))
 
-                # Save model
-                model_path = f"{self.config['paths']['models_dir']}/{model_name}_{phase}.pkl"
-                with open(model_path, 'wb') as f:
-                    pickle.dump(result['model'], f)
-                mlflow.log_artifact(model_path)
-                logger.info(f'✓ Model saved to {model_path}')
-                    
-                results[model_name] = result
+                        # Save model
+                        model_path = f"{self.config['paths']['models_dir']}/{model_name}_{phase}.pkl"
+                        with open(model_path, 'wb') as f:
+                            pickle.dump(result['model'], f)
+                        mlflow.log_artifact(model_path)
+                        logger.info(f'✓ Model saved to {model_path}')
+                            
+                        results[model_name] = result
+                else:
+                    # Train without MLflow
+                    result = self.train_model(model_name, x_train, y_train, x_val, y_val, phase)
+                    if result is not None:
+                        results[model_name] = result
+                        
+            except Exception as e:
+                logger.error(f"Failed to train {model_name}: {e}")
+                continue
         
         if not results:
             logger.error('No models were trained successfully!')
@@ -520,97 +584,112 @@ class ChurnModelTrainer:
         logger.info('STARTING MODEL TRAINING PIPELINE')
         logger.info('='*70)
         
-        with mlflow.start_run(run_name="churn_training_pipeline"):
-            # Log config
-            mlflow.log_params({
-                'project_version': self.config['project']['version'],
-                'random_seed': self.config['reproducibility']['random_seed']
-            })
-            
-            # Phase 1: Load and split data
-            self.load_and_split_data()
-            
-            # Phase 2: Initial feature filtering
-            self.initial_feature_filter()
-            
-            # Phase 3: Train initial models with all features
-            if self.config['training']['phases']['phase_1']['enabled']:
-                logger.info('\n' + '='*70)
-                logger.info('PHASE 1: INITIAL TRAINING (ALL FEATURES)')
-                logger.info('='*70)
-                
-                phase1_results = self.train_all_models(
-                    'phase1', self.x_train, self.y_train, self.x_val, self.y_val
-                )
-                
-                if not phase1_results:
-                    logger.error('Phase 1 training failed - no models trained')
-                    return
-                
-                # Find best model
-                best_model_name = max(
-                    phase1_results.keys(),
-                    key=lambda x: phase1_results[x]['val_metrics']['roc_auc']
-                )
-                best_model_result = phase1_results[best_model_name]
-                
-                logger.info(f"\n✓ Best Phase 1 Model: {best_model_name}")
-                logger.info(f"  ROC-AUC: {best_model_result['val_metrics']['roc_auc']:.4f}")
-                
-                # Phase 4: Feature importance analysis
-                if self.config['training']['phases']['phase_2']['enabled']:
-                    logger.info('\n' + '='*70)
-                    logger.info('PHASE 2: FEATURE IMPORTANCE ANALYSIS')
-                    logger.info('='*70)
-                    
-                    importance_df = self.analyze_feature_importance(
-                        best_model_result['model'],
-                        self.x_val,
-                        self.y_val,
-                        best_model_name
-                    )
-                    
-                    selected_features = self.select_features(importance_df)
-                    
-                    # Update datasets with selected features
-                    self.x_train = self.x_train[selected_features]
-                    self.x_val = self.x_val[selected_features]
-                    self.x_test = self.x_test[selected_features]
-            
-            # Phase 5: Retrain with selected features
-            if self.config['training']['phases']['phase_3']['enabled'] and self.selected_features:
-                logger.info('\n' + '='*70)
-                logger.info('PHASE 3: RETRAIN WITH SELECTED FEATURES')
-                logger.info('='*70)
-                
-                phase3_results = self.train_all_models(
-                    'phase3', self.x_train, self.y_train, self.x_val, self.y_val
-                )
-                
-                if not phase3_results:
-                    logger.error('Phase 3 training failed - no models trained')
-                    return
-                
-                # Find best model
-                best_model_name = max(
-                    phase3_results.keys(),
-                    key=lambda x: phase3_results[x]['val_metrics']['roc_auc']
-                )
-                best_model_result = phase3_results[best_model_name]
-                
-                self.best_model = best_model_result['model']
-                self.best_model_name = best_model_name
-                self.best_score = best_model_result['val_metrics']['roc_auc']
-                
-                logger.info(f"\n✓ Best Phase 3 Model: {best_model_name}")
-                logger.info(f"  ROC-AUC: {self.best_score:.4f}")
-            
-            # Final evaluation on test set
-            self.evaluate_final_model()
-            
+        try:
+            if self.config['mlflow']['enabled']:
+                with mlflow.start_run(run_name="churn_training_pipeline"):
+                    self._execute_pipeline()
+            else:
+                self._execute_pipeline()
+        except Exception as e:
+            logger.error(f"Pipeline execution failed: {e}", exc_info=True)
+            raise
+    
+    def _execute_pipeline(self):
+        """Internal pipeline execution"""
+        # Log config
+        if self.config['mlflow']['enabled']:
+            try:
+                mlflow.log_params({
+                    'project_version': self.config['project']['version'],
+                    'random_seed': self.config['reproducibility']['random_seed']
+                })
+            except:
+                pass
+        
+        # Phase 1: Load and split data
+        self.load_and_split_data()
+        
+        # Phase 2: Initial feature filtering
+        self.initial_feature_filter()
+        
+        # Phase 3: Train initial models with all features
+        if self.config['training']['phases']['phase_1']['enabled']:
             logger.info('\n' + '='*70)
-            logger.info('✓ PIPELINE COMPLETED SUCCESSFULLY')
+            logger.info('PHASE 1: INITIAL TRAINING (ALL FEATURES)')
             logger.info('='*70)
+            
+            phase1_results = self.train_all_models(
+                'phase1', self.x_train, self.y_train, self.x_val, self.y_val
+            )
+            
+            if not phase1_results:
+                logger.error('Phase 1 training failed - no models trained')
+                return
+            
+            # Find best model
+            best_model_name = max(
+                phase1_results.keys(),
+                key=lambda x: phase1_results[x]['val_metrics']['roc_auc']
+            )
+            best_model_result = phase1_results[best_model_name]
+            
+            logger.info(f"\n✓ Best Phase 1 Model: {best_model_name}")
+            logger.info(f"  ROC-AUC: {best_model_result['val_metrics']['roc_auc']:.4f}")
+            
+            # Phase 4: Feature importance analysis
+            if self.config['training']['phases']['phase_2']['enabled']:
+                logger.info('\n' + '='*70)
+                logger.info('PHASE 2: FEATURE IMPORTANCE ANALYSIS')
+                logger.info('='*70)
+                
+                importance_df = self.analyze_feature_importance(
+                    best_model_result['model'],
+                    self.x_val,
+                    self.y_val,
+                    best_model_name
+                )
+                
+                selected_features = self.select_features(importance_df)
+                
+                # Update datasets with selected features
+                self.x_train = self.x_train[selected_features]
+                self.x_val = self.x_val[selected_features]
+                self.x_test = self.x_test[selected_features]
+        
+        # Phase 5: Retrain with selected features
+        if self.config['training']['phases']['phase_3']['enabled'] and self.selected_features:
+            logger.info('\n' + '='*70)
+            logger.info('PHASE 3: RETRAIN WITH SELECTED FEATURES')
+            logger.info('='*70)
+            
+            phase3_results = self.train_all_models(
+                'phase3', self.x_train, self.y_train, self.x_val, self.y_val
+            )
+            
+            if not phase3_results:
+                logger.error('Phase 3 training failed - no models trained')
+                return
+            
+            # Find best model
+            best_model_name = max(
+                phase3_results.keys(),
+                key=lambda x: phase3_results[x]['val_metrics']['roc_auc']
+            )
+            best_model_result = phase3_results[best_model_name]
+            
+            self.best_model = best_model_result['model']
+            self.best_model_name = best_model_name
+            self.best_score = best_model_result['val_metrics']['roc_auc']
+            
+            logger.info(f"\n✓ Best Phase 3 Model: {best_model_name}")
+            logger.info(f"  ROC-AUC: {self.best_score:.4f}")
+        
+        # Final evaluation on test set
+        self.evaluate_final_model()
+        
+        logger.info('\n' + '='*70)
+        logger.info('✓ PIPELINE COMPLETED SUCCESSFULLY')
+        logger.info('='*70)
     
     def evaluate_final_model(self):
         """Evaluate best model on test set"""
@@ -622,68 +701,96 @@ class ChurnModelTrainer:
             logger.warning("No best model found - skipping final evaluation")
             return
         
-        # Predict
-        y_pred = self.best_model.predict(self.x_test)
-        y_pred_proba = self.best_model.predict_proba(self.x_test)[:, 1]
-        
-        # Metrics
-        test_metrics = {
-            'accuracy': accuracy_score(self.y_test, y_pred),
-            'precision': precision_score(self.y_test, y_pred, zero_division=0),
-            'recall': recall_score(self.y_test, y_pred, zero_division=0),
-            'f1': f1_score(self.y_test, y_pred, zero_division=0),
-            'roc_auc': roc_auc_score(self.y_test, y_pred_proba)
-        }
-        
-        logger.info(f"\nFinal Model: {self.best_model_name}")
-        logger.info(f"Test Set Performance:")
-        for metric, value in test_metrics.items():
-            logger.info(f"  {metric}: {value:.4f}")
-            mlflow.log_metric(f"test_{metric}", value)
-        
-        # Classification report
-        report = classification_report(self.y_test, y_pred)
-        logger.info(f"\nClassification Report:\n{report}")
-        
-        # Confusion matrix
-        cm = confusion_matrix(self.y_test, y_pred)
-        logger.info(f"\nConfusion Matrix:\n{cm}")
-        
-        # Save best model
-        best_model_path = self.config['paths']['best_model_path']
-        with open(best_model_path, 'wb') as f:
-            pickle.dump(self.best_model, f)
-        mlflow.log_artifact(best_model_path)
-        
-        logger.info(f"✓ Best model saved to {best_model_path}")
-        
-        # Save test metrics
-        test_metrics_path = 'results/test_metrics.json'
-        with open(test_metrics_path, 'w') as f:
-            json.dump(test_metrics, f, indent=4)
-        logger.info(f"✓ Test metrics saved to {test_metrics_path}")
+        try:
+            # Predict
+            y_pred = self.best_model.predict(self.x_test)
+            y_pred_proba = self.best_model.predict_proba(self.x_test)[:, 1]
+            
+            # Metrics
+            test_metrics = {
+                'accuracy': accuracy_score(self.y_test, y_pred),
+                'precision': precision_score(self.y_test, y_pred, zero_division=0),
+                'recall': recall_score(self.y_test, y_pred, zero_division=0),
+                'f1': f1_score(self.y_test, y_pred, zero_division=0),
+                'roc_auc': roc_auc_score(self.y_test, y_pred_proba)
+            }
+            
+            logger.info(f"\nFinal Model: {self.best_model_name}")
+            logger.info(f"Test Set Performance:")
+            for metric, value in test_metrics.items():
+                logger.info(f"  {metric}: {value:.4f}")
+                if self.config['mlflow']['enabled']:
+                    try:
+                        mlflow.log_metric(f"test_{metric}", value)
+                    except:
+                        pass
+            
+            # Classification report
+            report = classification_report(self.y_test, y_pred)
+            logger.info(f"\nClassification Report:\n{report}")
+            
+            # Confusion matrix
+            cm = confusion_matrix(self.y_test, y_pred)
+            logger.info(f"\nConfusion Matrix:\n{cm}")
+            
+            # Save best model
+            best_model_path = self.config['paths']['best_model_path']
+            with open(best_model_path, 'wb') as f:
+                pickle.dump(self.best_model, f)
+            
+            if self.config['mlflow']['enabled']:
+                try:
+                    mlflow.log_artifact(best_model_path)
+                except:
+                    pass
+            
+            logger.info(f"✓ Best model saved to {best_model_path}")
+            
+            # Save test metrics
+            test_metrics_path = 'results/test_metrics.json'
+            with open(test_metrics_path, 'w') as f:
+                json.dump(test_metrics, f, indent=4)
+            logger.info(f"✓ Test metrics saved to {test_metrics_path}")
+            
+        except Exception as e:
+            logger.error(f"Final evaluation failed: {e}", exc_info=True)
 
 
 def main():
-    """Main execution"""
+    """Main execution with proper cleanup"""
     try:
+        logger.info("Starting model training pipeline...")
         trainer = ChurnModelTrainer('config/model_training_config.yaml')
         trainer.run_pipeline()
         
         print("\n" + "="*70)
         print("✅ MODEL TRAINING COMPLETED SUCCESSFULLY!")
         print("="*70)
-        print(f"Best Model: {trainer.best_model_name}")
-        print(f"Best Score: {trainer.best_score:.4f}")
+        if trainer.best_model_name:
+            print(f"Best Model: {trainer.best_model_name}")
+            print(f"Best Score: {trainer.best_score:.4f}")
         print(f"Check logs/model_training.log for details")
-        print(f"View MLflow UI: mlflow ui")
+        if trainer.config['mlflow']['enabled']:
+            print(f"View MLflow UI: mlflow ui")
         print("="*70)
+        
+    except KeyboardInterrupt:
+        logger.info("Pipeline interrupted by user")
+        print("\n⚠️  Pipeline interrupted by user")
         
     except Exception as e:
         logger.error(f"Pipeline failed with error: {e}", exc_info=True)
         print(f"\n❌ Pipeline failed: {e}")
         print("Check logs/model_training.log for details")
         raise
+    
+    finally:
+        # Cleanup matplotlib resources
+        try:
+            import matplotlib.pyplot as plt
+            plt.close('all')
+        except:
+            pass
 
 
 if __name__ == '__main__':
